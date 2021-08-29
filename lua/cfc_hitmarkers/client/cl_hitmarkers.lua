@@ -108,7 +108,7 @@ cvars.AddChangeCallback( "cfc_hitmarkers_hit_duration", function( _, old, new )
 end )
 
 cvars.AddChangeCallback( "cfc_hitmarkers_mini_duration", function( _, old, new )
-    local oldVal = tonumber( old ) or 3
+    local oldVal = tonumber( old ) or 2.5
     local newVal = tonumber( new )
 
     if not newVal then
