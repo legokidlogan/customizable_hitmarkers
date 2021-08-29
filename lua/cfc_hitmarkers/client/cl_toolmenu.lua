@@ -125,8 +125,8 @@ hook.Add( "PopulateToolMenu", "CFC_Hitmarkers_PopulateToolMenu", function()
         panel:CheckBox( "Enable entity hitmarkers", "cfc_hitmarkers_ent_enabled" )
         panel:CheckBox( "Enable hitmarker sounds", "cfc_hitmarkers_sound_enabled" )
 
-        panel:NumSlider( "Hit duration (0 to disable)", "cfc_hitmarkers_hit_duration", 0, 10, 1 )
-        panel:NumSlider( "Mini hit duration (0 to disable)", "cfc_hitmarkers_mini_duration", 0, 10, 1 )
+        panel:NumSlider( "Hit duration\n(0 to disable)", "cfc_hitmarkers_hit_duration", 0, 10, 1 )
+        panel:NumSlider( "Mini hit duration\n(0 to disable)", "cfc_hitmarkers_mini_duration", 0, 10, 1 )
 
         panel:TextEntry( "Hit sound", "cfc_hitmarkers_hit_sound" )
         panel:TextEntry( "Headshot sound", "cfc_hitmarkers_headshot_sound" )
