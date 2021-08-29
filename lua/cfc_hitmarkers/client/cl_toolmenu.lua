@@ -42,21 +42,22 @@ local function createColorPicker( background, colorName, colorNameFancy )
     colorB:SetMax( 255 )
     colorB:SetDecimals( 0 )
 
-    local function updateColors( col, ignore )
+    local function updateColors( col, ignore, hue )
         if ignore ~= "r" then
-            colorR:SetValue( col.r )
+            colorR:SetText( tostring( col.r ) ) -- Sets the number's value without triggering :OnValueChanged()
         end
 
         if ignore ~= "g" then
-            colorG:SetValue( col.g )
+            colorG:SetText( tostring( col.g ) )
         end
 
         if ignore ~= "b" then
-            colorB:SetValue( col.b )
+            colorB:SetText( tostring( col.b ) )
         end
 
-        if ignore ~= "picker" then
-            colorPicker:SetRGB( col )
+        if ignore ~= "picker" and ignore ~= "cube" then
+            hue = hue or ColorToHSV( col )
+            colorPicker.LastY = 155 * ( 1 - hue / 360 )
         end
 
         colorCube:SetColor( col )
@@ -72,40 +73,40 @@ local function createColorPicker( background, colorName, colorNameFancy )
 
     function colorPicker:OnChange( col )
         local h = ColorToHSV( col )
-        local _, s, v = ColorToHSV( colorCube:GetRGB() )
+        local _, s, v = ColorToHSV( storedColor )
 
         col = HSVToColor( h, s, v )
 
-        updateColors( col, "picker" )
+        updateColors( col, "picker", h )
     end
 
     function colorCube:OnUserChanged( col )
-        local h = ColorToHSV( colorPicker:GetRGB() )
+        local h = ColorToHSV( storedColor )
         local _, s, v = ColorToHSV( col )
 
         col = HSVToColor( h, s, v )
 
-        updateColors( col )
+        updateColors( col, "cube", h )
     end
 
     function colorR:OnValueChanged( val )
         local col = storedColor
 
-        col.r = val
+        col.r = tonumber( val ) -- Clicking the up/down arrows yields a string instead of a number
         updateColors( col, "r" )
     end
 
     function colorG:OnValueChanged( val )
         local col = storedColor
 
-        col.g = val
+        col.g = tonumber( val )
         updateColors( col, "g" )
     end
 
     function colorB:OnValueChanged( val )
         local col = storedColor
 
-        col.b = val
+        col.b = tonumber( val )
         updateColors( col, "b" )
     end
 end
