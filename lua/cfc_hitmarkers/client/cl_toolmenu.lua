@@ -118,8 +118,6 @@ hook.Add( "AddToolMenuCategories", "CFC_Hitmarkers_AddToolMenuCategories", funct
 end )
 
 hook.Add( "PopulateToolMenu", "CFC_Hitmarkers_PopulateToolMenu", function()
-    
-
     spawnmenu.AddToolMenuOption( "Options", "CFC", "cfc_hitmarkers", "#Hitmarkers", "", "", function( panel )
         panel:CheckBox( "Enable hitmarkers", "cfc_hitmarkers_enabled" )
         panel:CheckBox( "Enable NPC hitmarkers", "cfc_hitmarkers_npc_enabled" )
