@@ -95,6 +95,14 @@ hook.Add( "PlayerDeath", "CFC_Hitmarkers_KillNotify", function( ply, _, attacker
     net.Send( attacker )
 end )
 
+hook.Add( "OnNPCKilled", "CFC_Hitmarkers_KillNotify", function( npc, attacker )
+    if not hitUsers[attacker] or not npcHitUsers[attacker] then return end
+
+    net.Start( "CFC_Hitmarkers_Kill" )
+    net.WriteEntity( npc )
+    net.Send( attacker )
+end )
+
 net.Receive( "CFC_Hitmarkers_EnableChanged", function( _, ply )
     local status = net.ReadBool()
 
