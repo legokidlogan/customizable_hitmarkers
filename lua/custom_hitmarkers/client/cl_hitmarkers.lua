@@ -225,7 +225,7 @@ hook.Add( "InitPostEntity", "CustomHitmarkers_DoIUseHitmarkers", function()
     end )
 end )
 
-hook.Add( "HUDPaint", "CustomHitMarkers_DrawHits", function()
+hook.Add( "HUDPaint", "CustomHitmarkers_DrawHits", function()
     for i = 1, CustomHitmarkers.MiniHitCount do
         local miniHit = miniHits[i]
         local screenPos = miniHit.Pos:ToScreen()
