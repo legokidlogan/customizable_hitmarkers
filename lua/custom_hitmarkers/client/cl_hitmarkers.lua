@@ -1,7 +1,7 @@
-CFC_Hitmarkers = CFC_Hitmarkers or {}
-CFC_Hitmarkers.Colors = CFC_Hitmarkers.Colors or {}
+CustomHitmarkers = CustomHitmarkers or {}
+CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
 
-local hitmarkerColors = CFC_Hitmarkers.Colors
+local hitmarkerColors = CustomHitmarkers.Colors
 local hitDuration
 local miniHitDuration
 
@@ -32,31 +32,31 @@ local FONT_DATA = {
     outline = false,
 }
 
-surface.CreateFont( "CFC_Hitmarkers_HitFont", FONT_DATA )
+surface.CreateFont( "CustomHitmarkers_HitFont", FONT_DATA )
 FONT_DATA.size = MINI_SIZE
-surface.CreateFont( "CFC_Hitmarkers_MiniFont", FONT_DATA )
+surface.CreateFont( "CustomHitmarkers_MiniFont", FONT_DATA )
 
-local HITMARKERS_ENABLED = CreateClientConVar( "cfc_hitmarkers_enabled", 1, true, false, "Enables hitmarkers.", 0, 1 )
-local HITMARKERS_NPC_ENABLED = CreateClientConVar( "cfc_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
-local HITMARKERS_ENT_ENABLED = CreateClientConVar( "cfc_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
-local HITMARKERS_SOUND_ENABLED = CreateClientConVar( "cfc_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
+local HITMARKERS_ENABLED = CreateClientConVar( "custom_hitmarkers_enabled", 1, true, false, "Enables hitmarkers.", 0, 1 )
+local HITMARKERS_NPC_ENABLED = CreateClientConVar( "custom_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
+local HITMARKERS_ENT_ENABLED = CreateClientConVar( "custom_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
+local HITMARKERS_SOUND_ENABLED = CreateClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
 
-local HIT_DURATION = CreateClientConVar( "cfc_hitmarkers_hit_duration", 3, true, false, "How long large hit numbers will linger for. 0 to disable.", 0, 10 )
-local MINI_DURATION = CreateClientConVar( "cfc_hitmarkers_mini_duration", 2.5, true, false, "How long mini hit numbers will linger for. 0 to disable.", 0, 10 )
+local HIT_DURATION = CreateClientConVar( "custom_hitmarkers_hit_duration", 3, true, false, "How long large hit numbers will linger for. 0 to disable.", 0, 10 )
+local MINI_DURATION = CreateClientConVar( "custom_hitmarkers_mini_duration", 2.5, true, false, "How long mini hit numbers will linger for. 0 to disable.", 0, 10 )
 
-local HIT_SOUND = CreateClientConVar( "cfc_hitmarkers_hit_sound", "buttons/lightswitch2.wav", true, false, "Sound used for regular hits." )
-local HEADSHOT_SOUND = CreateClientConVar( "cfc_hitmarkers_headshot_sound", "buttons/button16.wav", true, false, "Sound used for headshots." )
-local KILL_SOUND = CreateClientConVar( "cfc_hitmarkers_kill_sound", "buttons/combine_button1.wav", true, false, "Sound used for kills." )
+local HIT_SOUND = CreateClientConVar( "custom_hitmarkers_hit_sound", "buttons/lightswitch2.wav", true, false, "Sound used for regular hits." )
+local HEADSHOT_SOUND = CreateClientConVar( "custom_hitmarkers_headshot_sound", "buttons/button16.wav", true, false, "Sound used for headshots." )
+local KILL_SOUND = CreateClientConVar( "custom_hitmarkers_kill_sound", "buttons/combine_button1.wav", true, false, "Sound used for kills." )
 
-local HIT_SOUND_VOLUME = CreateClientConVar( "cfc_hitmarkers_hit_sound_volume", 1.5, true, false, "Volume for hit sounds.", 0, 4 )
-local HEADSHOT_SOUND_VOLUME = CreateClientConVar( "cfc_hitmarkers_headshot_sound_volume", 1, true, false, "Volume for headshot sounds.", 0, 4 )
-local KILL_SOUND_VOLUME = CreateClientConVar( "cfc_hitmarkers_kill_sound_volume", 1.5, true, false, "Volume for kill sounds.", 0, 4 )
+local HIT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_hit_sound_volume", 1.5, true, false, "Volume for hit sounds.", 0, 4 )
+local HEADSHOT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_headshot_sound_volume", 1, true, false, "Volume for headshot sounds.", 0, 4 )
+local KILL_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_kill_sound_volume", 1.5, true, false, "Volume for kill sounds.", 0, 4 )
 
-local HIT_COLOR = CreateClientConVar( "cfc_hitmarkers_hit_color", "255 0 0", true, false, "Color for hit numbers." )
-local MINI_COLOR = CreateClientConVar( "cfc_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
+local HIT_COLOR = CreateClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for hit numbers." )
+local MINI_COLOR = CreateClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
 
-function CFC_Hitmarkers.GetColorFromConvar( colorName, fallbackColor )
-    local convarName = "cfc_hitmarkers_" .. colorName .. "_color"
+function CustomHitmarkers.GetColorFromConvar( colorName, fallbackColor )
+    local convarName = "custom_hitmarkers_" .. colorName .. "_color"
     local col
     local result = ProtectedCall( function()
         local colTbl = string.Explode( " ", GetConVar( convarName ):GetString() )
@@ -66,9 +66,9 @@ function CFC_Hitmarkers.GetColorFromConvar( colorName, fallbackColor )
     return result and col or fallbackColor or Color( 255, 255, 255, 255 ), result
 end
 
-function CFC_Hitmarkers.SetColorFromConvar( colorName, fallbackStr, fallbackColor )
-    local convarName = "cfc_hitmarkers_" .. colorName .. "_color"
-    local col, result = CFC_Hitmarkers.GetColorFromConvar( colorName, fallbackColor )
+function CustomHitmarkers.SetColorFromConvar( colorName, fallbackStr, fallbackColor )
+    local convarName = "custom_hitmarkers_" .. colorName .. "_color"
+    local col, result = CustomHitmarkers.GetColorFromConvar( colorName, fallbackColor )
 
     if result then
         hitmarkerColors[colorName] = col
@@ -79,27 +79,27 @@ function CFC_Hitmarkers.SetColorFromConvar( colorName, fallbackStr, fallbackColo
 end
 
 if not hitmarkerColors.hit then
-    CFC_Hitmarkers.SetColorFromConvar( "hit", "255 0 0", Color( 255, 0, 0, 255 ) )
+    CustomHitmarkers.SetColorFromConvar( "hit", "255 0 0", Color( 255, 0, 0, 255 ) )
 end
 
 if not hitmarkerColors.mini_hit then
-    CFC_Hitmarkers.SetColorFromConvar( "mini_hit", "255 100 0", Color( 255, 100, 0, 255 ) )
+    CustomHitmarkers.SetColorFromConvar( "mini_hit", "255 100 0", Color( 255, 100, 0, 255 ) )
 end
 
-cvars.AddChangeCallback( "cfc_hitmarkers_hit_color", function()
-    CFC_Hitmarkers.SetColorFromConvar( "hit", "255 0 0", Color( 255, 0, 0, 255 ) )
+cvars.AddChangeCallback( "custom_hitmarkers_hit_color", function()
+    CustomHitmarkers.SetColorFromConvar( "hit", "255 0 0", Color( 255, 0, 0, 255 ) )
 end )
 
-cvars.AddChangeCallback( "cfc_hitmarkers_mini_hit_color", function()
-    CFC_Hitmarkers.SetColorFromConvar( "mini_hit", "255 0 0", Color( 255, 0, 0, 255 ) )
+cvars.AddChangeCallback( "custom_hitmarkers_mini_hit_color", function()
+    CustomHitmarkers.SetColorFromConvar( "mini_hit", "255 0 0", Color( 255, 0, 0, 255 ) )
 end )
 
-cvars.AddChangeCallback( "cfc_hitmarkers_hit_duration", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, old, new )
     local oldVal = tonumber( old ) or 3
     local newVal = tonumber( new )
 
     if not newVal then
-        LocalPlayer():ConCommand( "cfc_hitmarkers_hit_duration " .. oldVal )
+        LocalPlayer():ConCommand( "custom_hitmarkers_hit_duration " .. oldVal )
 
         return
     end
@@ -107,12 +107,12 @@ cvars.AddChangeCallback( "cfc_hitmarkers_hit_duration", function( _, old, new )
     hitDuration = newVal
 end )
 
-cvars.AddChangeCallback( "cfc_hitmarkers_mini_duration", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, old, new )
     local oldVal = tonumber( old ) or 2.5
     local newVal = tonumber( new )
 
     if not newVal then
-        LocalPlayer():ConCommand( "cfc_hitmarkers_mini_duration " .. oldVal )
+        LocalPlayer():ConCommand( "custom_hitmarkers_mini_duration " .. oldVal )
 
         return
     end
@@ -120,61 +120,61 @@ cvars.AddChangeCallback( "cfc_hitmarkers_mini_duration", function( _, old, new )
     miniHitDuration = newVal
 end )
 
-cvars.AddChangeCallback( "cfc_hitmarkers_enabled", function( _, old, new )
-    net.Start( "CFC_Hitmarkers_EnableChanged" )
+cvars.AddChangeCallback( "custom_hitmarkers_enabled", function( _, old, new )
+    net.Start( "CustomHitmarkers_EnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "cfc_hitmarkers_npc_enabled", function( _, old, new )
-    net.Start( "CFC_Hitmarkers_NPCEnableChanged" )
+cvars.AddChangeCallback( "custom_hitmarkers_npc_enabled", function( _, old, new )
+    net.Start( "CustomHitmarkers_NPCEnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "cfc_hitmarkers_ent_enabled", function( _, old, new )
-    net.Start( "CFC_Hitmarkers_EntEnableChanged" )
+cvars.AddChangeCallback( "custom_hitmarkers_ent_enabled", function( _, old, new )
+    net.Start( "CustomHitmarkers_EntEnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-CFC_Hitmarkers.MiniHitCount = 0
-CFC_Hitmarkers.HitScores = {}
-CFC_Hitmarkers.HitColors = {}
-CFC_Hitmarkers.HitTimes = {}
-CFC_Hitmarkers.HitPoints = {}
-CFC_Hitmarkers.MiniHits = {}
+CustomHitmarkers.MiniHitCount = 0
+CustomHitmarkers.HitScores = {}
+CustomHitmarkers.HitColors = {}
+CustomHitmarkers.HitTimes = {}
+CustomHitmarkers.HitPoints = {}
+CustomHitmarkers.MiniHits = {}
 
 hitDuration = HIT_DURATION:GetFloat() or 3
 miniHitDuration = MINI_DURATION:GetFloat() or 2.5
 
-local hitScores = CFC_Hitmarkers.HitScores
+local hitScores = CustomHitmarkers.HitScores
 local hitColors = {}
 local hitTimes = {}
 local hitPoints = {}
 local miniHits = {}
 
-CFC_Hitmarkers.SoundTbl = CFC_Hitmarkers.SoundTbl or {}
-CFC_Hitmarkers.SoundTbl.Hit = {
+CustomHitmarkers.SoundTbl = CustomHitmarkers.SoundTbl or {}
+CustomHitmarkers.SoundTbl.Hit = {
     Path = HIT_SOUND,
     Volume = HIT_SOUND_VOLUME,
     Pitch = function() return math.Rand( 0.9, 1.1 ) end
 }
-CFC_Hitmarkers.SoundTbl.Headshot = {
+CustomHitmarkers.SoundTbl.Headshot = {
     Path = HEADSHOT_SOUND,
     Volume = HEADSHOT_SOUND_VOLUME,
     Pitch = function() return math.Rand( 0.9, 1.1 ) end
 }
-CFC_Hitmarkers.SoundTbl.Kill = {
+CustomHitmarkers.SoundTbl.Kill = {
     Path = KILL_SOUND,
     Volume = KILL_SOUND_VOLUME,
     Pitch = 1
 }
 
-function CFC_Hitmarkers.DoSound( soundType )
+function CustomHitmarkers.DoSound( soundType )
     if not HITMARKERS_SOUND_ENABLED:GetBool() then return end 
 
-    local snd = CFC_Hitmarkers.SoundTbl[soundType]
+    local snd = CustomHitmarkers.SoundTbl[soundType]
 
     if not snd then return end
 
@@ -209,30 +209,30 @@ function CFC_Hitmarkers.DoSound( soundType )
     end )
 end
 
-hook.Add( "InitPostEntity", "CFC_Hitmarkers_DoIUseHitmarkers", function()
+hook.Add( "InitPostEntity", "CustomHitmarkers_DoIUseHitmarkers", function()
     timer.Simple( 10, function()
-        net.Start( "CFC_Hitmarkers_EnableChanged" )
+        net.Start( "CustomHitmarkers_EnableChanged" )
         net.WriteBool( HITMARKERS_ENABLED:GetBool() )
         net.SendToServer()
 
-        net.Start( "CFC_Hitmarkers_NPCEnableChanged" )
+        net.Start( "CustomHitmarkers_NPCEnableChanged" )
         net.WriteBool( HITMARKERS_NPC_ENABLED:GetBool() )
         net.SendToServer()
 
-        net.Start( "CFC_Hitmarkers_EntEnableChanged" )
+        net.Start( "CustomHitmarkers_EntEnableChanged" )
         net.WriteBool( HITMARKERS_ENT_ENABLED:GetBool() )
         net.SendToServer()
     end )
 end )
 
-hook.Add( "HUDPaint", "CFC_HitMarkers_DrawHits", function()
-    for i = 1, CFC_Hitmarkers.MiniHitCount do
+hook.Add( "HUDPaint", "CustomHitMarkers_DrawHits", function()
+    for i = 1, CustomHitmarkers.MiniHitCount do
         local miniHit = miniHits[i]
         local screenPos = miniHit.Pos:ToScreen()
         local xPos = screenPos.x
         local yPos = screenPos.y
 
-        draw.SimpleText( miniHit.Text, "CFC_Hitmarkers_MiniFont", xPos, yPos, miniHit.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        draw.SimpleText( miniHit.Text, "CustomHitmarkers_MiniFont", xPos, yPos, miniHit.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
     end
 
     for ply, score in pairs( hitScores ) do
@@ -240,11 +240,11 @@ hook.Add( "HUDPaint", "CFC_HitMarkers_DrawHits", function()
         local xPos = screenPos.x
         local yPos = screenPos.y
 
-        draw.SimpleText( tostring( score ), "CFC_Hitmarkers_HitFont", xPos, yPos, hitColors[ply], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        draw.SimpleText( tostring( score ), "CustomHitmarkers_HitFont", xPos, yPos, hitColors[ply], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
     end
 end )
 
-net.Receive( "CFC_Hitmarkers_Hit", function()
+net.Receive( "CustomHitmarkers_Hit", function()
     local ply = net.ReadEntity()
     local pos = net.ReadVector()
     local dmg = math.Round( net.ReadFloat(), ROUND_DECIMALS )
@@ -260,8 +260,8 @@ net.Receive( "CFC_Hitmarkers_Hit", function()
     local miniHitVel = Vector( math.Rand( -1, 1 ), math.Rand( -1, 1 ), math.Rand( -1, 1 ) )
     miniHitVel:Normalize()
 
-    local miniHitCount = CFC_Hitmarkers.MiniHitCount + 1
-    CFC_Hitmarkers.MiniHitCount = miniHitCount
+    local miniHitCount = CustomHitmarkers.MiniHitCount + 1
+    CustomHitmarkers.MiniHitCount = miniHitCount
 
     miniHits[miniHitCount] = {
         Pos = pos,
@@ -271,16 +271,16 @@ net.Receive( "CFC_Hitmarkers_Hit", function()
         Time = RealTime(),
     }
 
-    CFC_Hitmarkers.DoSound( headShot and "Headshot" or "Hit" )
+    CustomHitmarkers.DoSound( headShot and "Headshot" or "Hit" )
 end )
 
-net.Receive( "CFC_Hitmarkers_Kill", function()
+net.Receive( "CustomHitmarkers_Kill", function()
     local ply = net.ReadEntity()
 
-    CFC_Hitmarkers.DoSound( "Kill" )
+    CustomHitmarkers.DoSound( "Kill" )
 end )
 
-timer.Create( "CFC_Hitmarkers_UpdatePoints", UPDATE_INTERVAL, 0, function()
+timer.Create( "CustomHitmarkers_UpdatePoints", UPDATE_INTERVAL, 0, function()
     local curTime = RealTime()
 
     for ply, time in pairs( hitTimes ) do
@@ -296,7 +296,7 @@ timer.Create( "CFC_Hitmarkers_UpdatePoints", UPDATE_INTERVAL, 0, function()
         end
     end
 
-    local miniHitCount = CFC_Hitmarkers.MiniHitCount
+    local miniHitCount = CustomHitmarkers.MiniHitCount
 
     for i = miniHitCount, 1, -1 do
         local miniHit = miniHits[i]
@@ -312,5 +312,5 @@ timer.Create( "CFC_Hitmarkers_UpdatePoints", UPDATE_INTERVAL, 0, function()
         end
     end
 
-    CFC_Hitmarkers.MiniHitCount = miniHitCount
+    CustomHitmarkers.MiniHitCount = miniHitCount
 end )

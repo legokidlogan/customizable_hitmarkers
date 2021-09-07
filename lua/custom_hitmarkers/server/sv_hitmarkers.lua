@@ -1,21 +1,21 @@
-CFC_Hitmarkers = CFC_Hitmarkers or {}
-CFC_Hitmarkers.HitUsers = CFC_Hitmarkers.HitUsers or {}
-CFC_Hitmarkers.NPCHitUsers = CFC_Hitmarkers.NPCHitUsers or {}
-CFC_Hitmarkers.EntHitUsers = CFC_Hitmarkers.EntHitUsers or {}
-CFC_Hitmarkers.HEAD_DIST = 10
-CFC_Hitmarkers.HEAD_DIST_SQUARED = CFC_Hitmarkers.HEAD_DIST ^ 2
+CustomHitmarkers = CustomHitmarkers or {}
+CustomHitmarkers.HitUsers = CustomHitmarkers.HitUsers or {}
+CustomHitmarkers.NPCHitUsers = CustomHitmarkers.NPCHitUsers or {}
+CustomHitmarkers.EntHitUsers = CustomHitmarkers.EntHitUsers or {}
+CustomHitmarkers.HEAD_DIST = 10
+CustomHitmarkers.HEAD_DIST_SQUARED = CustomHitmarkers.HEAD_DIST ^ 2
 
-local hitUsers = CFC_Hitmarkers.HitUsers
-local npcHitUsers = CFC_Hitmarkers.NPCHitUsers
-local entHitUsers = CFC_Hitmarkers.EntHitUsers
+local hitUsers = CustomHitmarkers.HitUsers
+local npcHitUsers = CustomHitmarkers.NPCHitUsers
+local entHitUsers = CustomHitmarkers.EntHitUsers
 
-util.AddNetworkString( "CFC_Hitmarkers_Hit" )
-util.AddNetworkString( "CFC_Hitmarkers_Kill" )
-util.AddNetworkString( "CFC_Hitmarkers_EnableChanged" )
-util.AddNetworkString( "CFC_Hitmarkers_NPCEnableChanged" )
-util.AddNetworkString( "CFC_Hitmarkers_EntEnableChanged" )
+util.AddNetworkString( "CustomHitmarkers_Hit" )
+util.AddNetworkString( "CustomHitmarkers_Kill" )
+util.AddNetworkString( "CustomHitmarkers_EnableChanged" )
+util.AddNetworkString( "CustomHitmarkers_NPCEnableChanged" )
+util.AddNetworkString( "CustomHitmarkers_EntEnableChanged" )
 
-hook.Add( "EntityTakeDamage", "CFC_HitMarkers_TrackDamagePos", function( ent, dmg )
+hook.Add( "EntityTakeDamage", "CustomHitMarkers_TrackDamagePos", function( ent, dmg )
     if not IsValid( ent ) then return end
 
     local attacker = dmg:GetAttacker()
@@ -41,11 +41,11 @@ hook.Add( "EntityTakeDamage", "CFC_HitMarkers_TrackDamagePos", function( ent, dm
             local headBone = ent:GetAttachment( ent:LookupAttachment( "eyes" ) )
 
             if headBone then
-                headShot = headBone.Pos:DistToSqr( pos ) <= CFC_Hitmarkers.HEAD_DIST_SQUARED
+                headShot = headBone.Pos:DistToSqr( pos ) <= CustomHitmarkers.HEAD_DIST_SQUARED
             end
         end
 
-        net.Start( "CFC_Hitmarkers_Hit" )
+        net.Start( "CustomHitmarkers_Hit" )
         net.WriteEntity( ent )
         net.WriteVector( pos )
         net.WriteFloat( damage )
@@ -59,7 +59,7 @@ hook.Add( "EntityTakeDamage", "CFC_HitMarkers_TrackDamagePos", function( ent, dm
     attacker.hitmarkerPoints[ent] = pos
 end, HOOK_LOW )
 
-hook.Add( "PlayerHurt", "CFC_Hitmarkers_HitNotify", function( ply, attacker, newHealth, damage )
+hook.Add( "PlayerHurt", "CustomHitmarkers_HitNotify", function( ply, attacker, newHealth, damage )
     if not hitUsers[attacker] then return end
 
     attacker.hitmarkerPoints = attacker.hitmarkerPoints or {}
@@ -74,10 +74,10 @@ hook.Add( "PlayerHurt", "CFC_Hitmarkers_HitNotify", function( ply, attacker, new
     local headBone = ply:GetAttachment( ply:LookupAttachment( "eyes" ) )
 
     if headBone then
-        headShot = headBone.Pos:DistToSqr( pos ) <= CFC_Hitmarkers.HEAD_DIST_SQUARED
+        headShot = headBone.Pos:DistToSqr( pos ) <= CustomHitmarkers.HEAD_DIST_SQUARED
     end
 
-    net.Start( "CFC_Hitmarkers_Hit" )
+    net.Start( "CustomHitmarkers_Hit" )
     net.WriteEntity( ply )
     net.WriteVector( pos )
     net.WriteFloat( damage )
@@ -87,35 +87,35 @@ hook.Add( "PlayerHurt", "CFC_Hitmarkers_HitNotify", function( ply, attacker, new
     attacker.hitmarkerPoints[ply] = nil
 end )
 
-hook.Add( "PlayerDeath", "CFC_Hitmarkers_KillNotify", function( ply, _, attacker )
+hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attacker )
     if not hitUsers[attacker] then return end
 
-    net.Start( "CFC_Hitmarkers_Kill" )
+    net.Start( "CustomHitmarkers_Kill" )
     net.WriteEntity( ply )
     net.Send( attacker )
 end )
 
-hook.Add( "OnNPCKilled", "CFC_Hitmarkers_KillNotify", function( npc, attacker )
+hook.Add( "OnNPCKilled", "CustomHitmarkers_KillNotify", function( npc, attacker )
     if not hitUsers[attacker] or not npcHitUsers[attacker] then return end
 
-    net.Start( "CFC_Hitmarkers_Kill" )
+    net.Start( "CustomHitmarkers_Kill" )
     net.WriteEntity( npc )
     net.Send( attacker )
 end )
 
-net.Receive( "CFC_Hitmarkers_EnableChanged", function( _, ply )
+net.Receive( "CustomHitmarkers_EnableChanged", function( _, ply )
     local status = net.ReadBool()
 
     hitUsers[ply] = status and ply or nil
 end )
 
-net.Receive( "CFC_Hitmarkers_NPCEnableChanged", function( _, ply )
+net.Receive( "CustomHitmarkers_NPCEnableChanged", function( _, ply )
     local status = net.ReadBool()
 
     npcHitUsers[ply] = status and ply or nil
 end )
 
-net.Receive( "CFC_Hitmarkers_EntEnableChanged", function( _, ply )
+net.Receive( "CustomHitmarkers_EntEnableChanged", function( _, ply )
     local status = net.ReadBool()
 
     entHitUsers[ply] = status and ply or nil

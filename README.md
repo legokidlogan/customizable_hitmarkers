@@ -1,2 +1,2 @@
-# cfc_hitmarkers
+# customizable_hitmarkers
 Hitmarkers for Garry's Mod

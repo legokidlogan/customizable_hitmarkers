@@ -1,8 +1,8 @@
-CFC_Hitmarkers = CFC_Hitmarkers or {}
-CFC_Hitmarkers.Colors = CFC_Hitmarkers.Colors or {}
+CustomHitmarkers = CustomHitmarkers or {}
+CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
 
 local function createColorPicker( background, colorName, colorNameFancy )
-    local storedColor = CFC_Hitmarkers.GetColorFromConvar( colorName )
+    local storedColor = CustomHitmarkers.GetColorFromConvar( colorName )
 
     local label = vgui.Create( "DLabel", background )
     label:SetPos( 5, 5 )
@@ -64,7 +64,7 @@ local function createColorPicker( background, colorName, colorNameFancy )
         storedColor = col
 
         if ignore ~= "concmd" then
-            LocalPlayer():ConCommand( "cfc_hitmarkers_" .. colorName .. "_color " .. col.r .. " " .. col.g .. " " .. col.b )
+            LocalPlayer():ConCommand( "custom_hitmarkers_" .. colorName .. "_color " .. col.r .. " " .. col.g .. " " .. col.b )
         end
     end
 
@@ -114,27 +114,27 @@ end
 local hitColorPicker
 local miniHitColorPicker
 
-hook.Add( "AddToolMenuCategories", "CFC_Hitmarkers_AddToolMenuCategories", function()
-    spawnmenu.AddToolCategory( "Options", "CFC", "#CFC" )
+hook.Add( "AddToolMenuCategories", "CustomHitmarkers_AddToolMenuCategories", function()
+    spawnmenu.AddToolCategory( "Options", "Hitmarkers", "#Hitmarkers" )
 end )
 
-hook.Add( "PopulateToolMenu", "CFC_Hitmarkers_PopulateToolMenu", function()
-    spawnmenu.AddToolMenuOption( "Options", "CFC", "cfc_hitmarkers", "#Hitmarkers", "", "", function( panel )
-        panel:CheckBox( "Enable hitmarkers", "cfc_hitmarkers_enabled" )
-        panel:CheckBox( "Enable NPC hitmarkers", "cfc_hitmarkers_npc_enabled" )
-        panel:CheckBox( "Enable entity hitmarkers", "cfc_hitmarkers_ent_enabled" )
-        panel:CheckBox( "Enable hitmarker sounds", "cfc_hitmarkers_sound_enabled" )
+hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
+    spawnmenu.AddToolMenuOption( "Options", "Hitmarkers", "custom_hitmarkers", "#Hitmarkers", "", "", function( panel )
+        panel:CheckBox( "Enable hitmarkers", "custom_hitmarkers_enabled" )
+        panel:CheckBox( "Enable NPC hitmarkers", "custom_hitmarkers_npc_enabled" )
+        panel:CheckBox( "Enable entity hitmarkers", "custom_hitmarkers_ent_enabled" )
+        panel:CheckBox( "Enable hitmarker sounds", "custom_hitmarkers_sound_enabled" )
 
-        panel:NumSlider( "Hit duration\n(0 to disable)", "cfc_hitmarkers_hit_duration", 0, 10, 1 )
-        panel:NumSlider( "Mini hit duration\n(0 to disable)", "cfc_hitmarkers_mini_duration", 0, 10, 1 )
+        panel:NumSlider( "Hit duration\n(0 to disable)", "custom_hitmarkers_hit_duration", 0, 10, 1 )
+        panel:NumSlider( "Mini hit duration\n(0 to disable)", "custom_hitmarkers_mini_duration", 0, 10, 1 )
 
-        panel:TextEntry( "Hit sound", "cfc_hitmarkers_hit_sound" )
-        panel:TextEntry( "Headshot sound", "cfc_hitmarkers_headshot_sound" )
-        panel:TextEntry( "Kill sound", "cfc_hitmarkers_kill_sound" )
+        panel:TextEntry( "Hit sound", "custom_hitmarkers_hit_sound" )
+        panel:TextEntry( "Headshot sound", "custom_hitmarkers_headshot_sound" )
+        panel:TextEntry( "Kill sound", "custom_hitmarkers_kill_sound" )
 
-        panel:NumSlider( "Hit sound volume", "cfc_hitmarkers_hit_sound_volume", 0, 4, 1 )
-        panel:NumSlider( "Headshot sound volume", "cfc_hitmarkers_headshot_sound_volume", 0, 4, 1 )
-        panel:NumSlider( "Kill sound volume", "cfc_hitmarkers_kill_sound_volume", 0, 4, 1 )
+        panel:NumSlider( "Hit sound volume", "custom_hitmarkers_hit_sound_volume", 0, 4, 1 )
+        panel:NumSlider( "Headshot sound volume", "custom_hitmarkers_headshot_sound_volume", 0, 4, 1 )
+        panel:NumSlider( "Kill sound volume", "custom_hitmarkers_kill_sound_volume", 0, 4, 1 )
 
         hitColorPicker = vgui.Create( "DPanel", panel )
         hitColorPicker:SetSize( 200, 185 )
