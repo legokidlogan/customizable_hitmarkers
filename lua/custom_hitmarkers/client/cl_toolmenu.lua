@@ -128,6 +128,9 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         panel:NumSlider( "Hit duration\n(0 to disable)", "custom_hitmarkers_hit_duration", 0, 10, 1 )
         panel:NumSlider( "Mini hit duration\n(0 to disable)", "custom_hitmarkers_mini_duration", 0, 10, 1 )
 
+        panel:NumSlider( "Hit font size", "custom_hitmarkers_hit_size", 1, 200, 0 )
+        panel:NumSlider( "Mini hit font size", "custom_hitmarkers_mini_size", 1, 200, 0 )
+
         panel:TextEntry( "Hit sound", "custom_hitmarkers_hit_sound" )
         panel:TextEntry( "Headshot sound", "custom_hitmarkers_headshot_sound" )
         panel:TextEntry( "Kill sound", "custom_hitmarkers_kill_sound" )
