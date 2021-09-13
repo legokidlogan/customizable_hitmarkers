@@ -135,6 +135,10 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         panel:TextEntry( "Headshot sound", "custom_hitmarkers_headshot_sound" )
         panel:TextEntry( "Kill sound", "custom_hitmarkers_kill_sound" )
 
+        if WireLib then
+            panel:Button( "Sound Browser", "wire_sound_browser_open" )
+        end
+
         panel:NumSlider( "Hit sound volume", "custom_hitmarkers_hit_sound_volume", 0, 4, 1 )
         panel:NumSlider( "Headshot sound volume", "custom_hitmarkers_headshot_sound_volume", 0, 4, 1 )
         panel:NumSlider( "Kill sound volume", "custom_hitmarkers_kill_sound_volume", 0, 4, 1 )
