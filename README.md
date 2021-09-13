@@ -28,3 +28,5 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_kill_sound_volume | Volume for kill sounds. | 1.5 |
 | custom_hitmarkers_hit_color | Color for hit numbers. | 255 0 0 |
 | custom_hitmarkers_mini_hit_color | Color for mini hit numbers. | 255 100 0 |
+| custom_hitmarkers_hit_size | The font size for hit numbers. | 30 |
+| custom_hitmarkers_mini_size | The font size for mini hit numbers. | 30 |
