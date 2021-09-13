@@ -7,8 +7,6 @@ local miniHitDuration
 
 local UPDATE_INTERVAL = 0.01
 local ROUND_DECIMALS = 1
-local HIT_SIZE = 30
-local MINI_SIZE = 30
 local MINI_SPEED_MIN = 1.5
 local MINI_SPEED_MAX = 3
 local MINI_INERTIA = 0.93
@@ -17,7 +15,7 @@ local MINI_GRAVITY = 0.03
 local FONT_DATA = {
     font = "Roboto Mono",
     extended = false,
-    size = HIT_SIZE,
+    size = 30,
     weight = 500,
     blursize = 0,
     scanlines = 0,
@@ -31,10 +29,6 @@ local FONT_DATA = {
     Additive = false,
     outline = false,
 }
-
-surface.CreateFont( "CustomHitmarkers_HitFont", FONT_DATA )
-FONT_DATA.size = MINI_SIZE
-surface.CreateFont( "CustomHitmarkers_MiniFont", FONT_DATA )
 
 local HITMARKERS_ENABLED = CreateClientConVar( "custom_hitmarkers_enabled", 1, true, false, "Enables hitmarkers.", 0, 1 )
 local HITMARKERS_NPC_ENABLED = CreateClientConVar( "custom_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
@@ -54,6 +48,14 @@ local KILL_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_kill_sound_volu
 
 local HIT_COLOR = CreateClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for hit numbers." )
 local MINI_COLOR = CreateClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
+
+local HIT_SIZE = CreateClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for hit numbers.", 1, 200 )
+local MINI_SIZE = CreateClientConVar( "custom_hitmarkers_mini_size", 30, true, false, "The font size for mini hit numbers.", 1, 200 )
+
+FONT_DATA.size = HIT_SIZE:GetInt()
+surface.CreateFont( "CustomHitmarkers_HitFont", FONT_DATA )
+FONT_DATA.size = MINI_SIZE:GetInt()
+surface.CreateFont( "CustomHitmarkers_MiniFont", FONT_DATA )
 
 function CustomHitmarkers.GetColorFromConvar( colorName, fallbackColor )
     local convarName = "custom_hitmarkers_" .. colorName .. "_color"
@@ -136,6 +138,34 @@ cvars.AddChangeCallback( "custom_hitmarkers_ent_enabled", function( _, old, new 
     net.Start( "CustomHitmarkers_EntEnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
+end )
+
+cvars.AddChangeCallback( "custom_hitmarkers_hit_size", function( _, old, new )
+    local oldVal = tonumber( old ) or 30
+    local newVal = tonumber( new )
+
+    if not newVal then
+        LocalPlayer():ConCommand( "custom_hitmarkers_hit_size " .. oldVal )
+
+        return
+    end
+
+    FONT_DATA.size = newVal
+    surface.CreateFont( "CustomHitmarkers_HitFont", FONT_DATA )
+end )
+
+cvars.AddChangeCallback( "custom_hitmarkers_mini_size", function( _, old, new )
+    local oldVal = tonumber( old ) or 30
+    local newVal = tonumber( new )
+
+    if not newVal then
+        LocalPlayer():ConCommand( "custom_hitmarkers_mini_size " .. oldVal )
+
+        return
+    end
+
+    FONT_DATA.size = newVal
+    surface.CreateFont( "CustomHitmarkers_MiniFont", FONT_DATA )
 end )
 
 CustomHitmarkers.MiniHitCount = 0
