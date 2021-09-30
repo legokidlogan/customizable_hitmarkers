@@ -9,6 +9,8 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_ratelimit_track_duration | The window of time (in seconds) for hit counts to be tracked per player before getting reset to 0. | 0.5 |
 | custom_hitmarkers_ratelimit_threshold | How many hit events a player must trigger in short succesion to become ratelimited. | 50 |
 | custom_hitmarkers_ratelimit_cooldown | How long (in seconds) hit events for a player will be ignored after breaching the ratelimit threshold. | 2 |
+| custom_hitmarkers_npc_allowed | Allows players to opt in to NPC hitmarkers. | 1 |
+| custom_hitmarkers_ent_allowed | Allows players to opt in to entity hitmarkers. | 1 |
 
 ## Client Convars
 
