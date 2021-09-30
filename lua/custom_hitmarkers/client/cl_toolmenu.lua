@@ -1,6 +1,14 @@
 CustomHitmarkers = CustomHitmarkers or {}
 CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
 
+local convarFlags = { FCVAR_ARCHIVE, FCVAR_REPLICATED }
+
+local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags, "Allows players to opt-in to NPC hitmarkers.", 0, 1 )
+local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags, "Allows players to opt-in to entity hitmarkers.", 0, 1 )
+
+local TEXT_COLOR = Color( 0, 0, 0, 255 )
+local TEXT_COLOR_UNUSABLE = Color( 128, 128, 128, 255 )
+
 local function createColorPicker( background, colorName, colorNameFancy )
     local storedColor = CustomHitmarkers.GetColorFromConvar( colorName )
 
@@ -111,8 +119,19 @@ local function createColorPicker( background, colorName, colorNameFancy )
     end
 end
 
+local function updateUsabilityColor( panel, state )
+    if not panel then return end
+
+    local skin = panel:GetSkin() or SKIN or {}
+    local newCol = state and ( skin.colTextEntryText or TEXT_COLOR ) or skin.colTextEntryTextPlaceholder or TEXT_COLOR_UNUSABLE
+
+    panel:SetTextColor( newCol )
+end
+
 local hitColorPicker
 local miniHitColorPicker
+local npcCB
+local entCB
 
 hook.Add( "AddToolMenuCategories", "CustomHitmarkers_AddToolMenuCategories", function()
     spawnmenu.AddToolCategory( "Options", "Hitmarkers", "#Hitmarkers" )
@@ -121,8 +140,8 @@ end )
 hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
     spawnmenu.AddToolMenuOption( "Options", "Hitmarkers", "custom_hitmarkers", "#Hitmarkers", "", "", function( panel )
         panel:CheckBox( "Enable hitmarkers", "custom_hitmarkers_enabled" )
-        panel:CheckBox( "Enable NPC hitmarkers", "custom_hitmarkers_npc_enabled" )
-        panel:CheckBox( "Enable entity hitmarkers", "custom_hitmarkers_ent_enabled" )
+        npcCB = panel:CheckBox( "Enable NPC hitmarkers", "custom_hitmarkers_npc_enabled" )
+        entCB = panel:CheckBox( "Enable entity hitmarkers", "custom_hitmarkers_ent_enabled" )
         panel:CheckBox( "Enable hitmarker sounds", "custom_hitmarkers_sound_enabled" )
 
         panel:NumSlider( "Hit duration\n(0 to disable)", "custom_hitmarkers_hit_duration", 0, 10, 1 )
@@ -154,5 +173,16 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
 
         panel:AddItem( hitColorPicker )
         panel:AddItem( miniHitColorPicker )
+
+        updateUsabilityColor( npcCB, NPC_ALLOWED:GetBool() )
+        updateUsabilityColor( entCB, ENT_ALLOWED:GetBool() )
     end )
+end )
+
+net.Receive( "CustomHitmarkers_NPCAllowedChanged", function()
+    updateUsabilityColor( npcCB, net.ReadBool() )
+end )
+
+net.Receive( "CustomHitmarkers_ENTAllowedChanged", function()
+    updateUsabilityColor( entCB, net.ReadBool() )
 end )

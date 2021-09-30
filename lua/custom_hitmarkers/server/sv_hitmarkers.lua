@@ -8,11 +8,15 @@ CustomHitmarkers.HEAD_DIST = 10
 CustomHitmarkers.HEAD_DIST_SQUARED = CustomHitmarkers.HEAD_DIST ^ 2
 
 local convarFlags = { FCVAR_ARCHIVE, FCVAR_PROTECTED }
+local convarFlags2 = { FCVAR_ARCHIVE, FCVAR_REPLICATED }
 
 local RATELIMIT_ENABLED = CreateConVar( "custom_hitmarkers_ratelimit_enabled", 1, convarFlags, "Enables ratelimiting on hitmarkers to prevent net message spam.", 0, 1 )
 local RATELIMIT_TRACK_DURATION = CreateConVar( "custom_hitmarkers_ratelimit_track_duration", 0.5, convarFlags, "The window of time (in seconds) for hit counts to be tracked per player before getting reset to 0.", 0, 50000 )
 local RATELIMIT_THRESHOLD = CreateConVar( "custom_hitmarkers_ratelimit_threshold", 50, convarFlags, "How many hit events a player must trigger in short succesion to become ratelimited.", 2, 50000 )
 local RATELIMIT_COOLDOWN = CreateConVar( "custom_hitmarkers_ratelimit_cooldown", 2, convarFlags, "How long (in seconds) hit events for a player will be ignored after breaching the ratelimit threshold.", 0, 50000 )
+
+local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags2, "Allows players to opt-in to NPC hitmarkers.", 0, 1 )
+local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags2, "Allows players to opt-in to entity hitmarkers.", 0, 1 )
 
 local hitUsers = CustomHitmarkers.HitUsers
 local npcHitUsers = CustomHitmarkers.NPCHitUsers
@@ -25,11 +29,16 @@ local ratelimitTrackDuration = RATELIMIT_TRACK_DURATION:GetFloat()
 local ratelimitThreshold = RATELIMIT_THRESHOLD:GetInt()
 local ratelimitCooldown = RATELIMIT_COOLDOWN:GetFloat()
 
+local npcHitsAllowed = NPC_ALLOWED:GetBool()
+local entHitsAllowed = ENT_ALLOWED:GetBool()
+
 util.AddNetworkString( "CustomHitmarkers_Hit" )
 util.AddNetworkString( "CustomHitmarkers_Kill" )
 util.AddNetworkString( "CustomHitmarkers_EnableChanged" )
 util.AddNetworkString( "CustomHitmarkers_NPCEnableChanged" )
 util.AddNetworkString( "CustomHitmarkers_EntEnableChanged" )
+util.AddNetworkString( "CustomHitmarkers_NPCAllowedChanged" )
+util.AddNetworkString( "CustomHitmarkers_EntAllowedChanged" )
 
 cvars.AddChangeCallback( "custom_hitmarkers_ratelimit_enabled", function( _, old, new )
     ratelimitEnabled = tobool( tonumber( new ) or tonumber( old ) )
@@ -45,6 +54,26 @@ end )
 
 cvars.AddChangeCallback( "custom_hitmarkers_ratelimit_cooldown", function( _, old, new )
     ratelimitCooldown = tonumber( new ) or tonumber( old ) or 2
+end )
+
+cvars.AddChangeCallback( "custom_hitmarkers_npc_allowed", function( _, old, new )
+    local state = new ~= "0"
+
+    npcHitsAllowed = state
+
+    net.Start( "CustomHitmarkers_NPCAllowedChanged" )
+    net.WriteBool( state )
+    net.Broadcast()
+end )
+
+cvars.AddChangeCallback( "custom_hitmarkers_ent_allowed", function( _, old, new )
+    local state = new ~= "0"
+
+    entHitsAllowed = state
+
+    net.Start( "CustomHitmarkers_ENTAllowedChanged" )
+    net.WriteBool( state )
+    net.Broadcast()
 end )
 
 function CustomHitmarkers.RatelimitCheck( attacker )
@@ -89,8 +118,8 @@ hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, 
     local isPlayer = ent:IsPlayer()
 
     if isNPC then
-        if not npcHitUsers[attacker] then return end
-    elseif not isPlayer and not entHitUsers[attacker] then
+        if not npcHitsAllowed or not npcHitUsers[attacker] then return end
+    elseif not isPlayer and ( not entHitsAllowed or not entHitUsers[attacker] ) then
         return
     end
 
