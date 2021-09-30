@@ -18,6 +18,8 @@ local RATELIMIT_COOLDOWN = CreateConVar( "custom_hitmarkers_ratelimit_cooldown",
 local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags2, "Allows players to opt in to NPC hitmarkers.", 0, 1 )
 local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags2, "Allows players to opt in to entity hitmarkers.", 0, 1 )
 
+local ZERO_VECTOR = Vector( 0, 0, 0 )
+
 local hitUsers = CustomHitmarkers.HitUsers
 local npcHitUsers = CustomHitmarkers.NPCHitUsers
 local entHitUsers = CustomHitmarkers.EntHitUsers
@@ -125,8 +127,12 @@ hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, 
 
     if ratelimitCheck( attacker ) then return end
 
-    local damage = dmg:GetDamage()
+    local damage = dmg:GetDamage() or 0
     local pos = dmg:GetDamagePosition()
+
+    if not pos or pos == ZERO_VECTOR then
+        pos = ent:WorldSpaceCenter()
+    end
 
     if not isPlayer then
         local headShot = false
