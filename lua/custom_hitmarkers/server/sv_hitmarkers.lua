@@ -15,8 +15,8 @@ local RATELIMIT_TRACK_DURATION = CreateConVar( "custom_hitmarkers_ratelimit_trac
 local RATELIMIT_THRESHOLD = CreateConVar( "custom_hitmarkers_ratelimit_threshold", 50, convarFlags, "How many hit events a player must trigger in short succesion to become ratelimited.", 2, 50000 )
 local RATELIMIT_COOLDOWN = CreateConVar( "custom_hitmarkers_ratelimit_cooldown", 2, convarFlags, "How long (in seconds) hit events for a player will be ignored after breaching the ratelimit threshold.", 0, 50000 )
 
-local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags2, "Allows players to opt-in to NPC hitmarkers.", 0, 1 )
-local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags2, "Allows players to opt-in to entity hitmarkers.", 0, 1 )
+local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags2, "Allows players to opt in to NPC hitmarkers.", 0, 1 )
+local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags2, "Allows players to opt in to entity hitmarkers.", 0, 1 )
 
 local hitUsers = CustomHitmarkers.HitUsers
 local npcHitUsers = CustomHitmarkers.NPCHitUsers

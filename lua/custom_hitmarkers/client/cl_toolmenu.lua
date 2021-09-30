@@ -3,8 +3,8 @@ CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
 
 local convarFlags = { FCVAR_ARCHIVE, FCVAR_REPLICATED }
 
-local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags, "Allows players to opt-in to NPC hitmarkers.", 0, 1 )
-local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags, "Allows players to opt-in to entity hitmarkers.", 0, 1 )
+local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags, "Allows players to opt in to NPC hitmarkers.", 0, 1 )
+local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags, "Allows players to opt in to entity hitmarkers.", 0, 1 )
 
 local TEXT_COLOR = Color( 0, 0, 0, 255 )
 local TEXT_COLOR_UNUSABLE = Color( 128, 128, 128, 255 )
