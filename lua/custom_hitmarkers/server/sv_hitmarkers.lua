@@ -160,7 +160,7 @@ hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, 
 end, HOOK_LOW )
 
 hook.Add( "PlayerHurt", "CustomHitmarkers_HitNotify", function( ply, attacker, newHealth, damage )
-    if not IsValid( attacker ) or not attacker:IsPlayer() or not hitUsers[attacker] then return end
+    if ply == attacker or not IsValid( attacker ) or not attacker:IsPlayer() or not hitUsers[attacker] then return end
     if ratelimitCheck( attacker ) then return end
 
     attacker.hitmarkerPoints = attacker.hitmarkerPoints or {}
@@ -189,7 +189,7 @@ hook.Add( "PlayerHurt", "CustomHitmarkers_HitNotify", function( ply, attacker, n
 end )
 
 hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attacker )
-    if not hitUsers[attacker] then return end
+    if ply == attacker or not hitUsers[attacker] then return end
 
     net.Start( "CustomHitmarkers_Kill" )
     net.WriteEntity( ply )
