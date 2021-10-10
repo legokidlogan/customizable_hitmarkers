@@ -32,3 +32,6 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_mini_hit_color | Color for mini hit numbers. | 255 100 0 |
 | custom_hitmarkers_hit_size | The font size for hit numbers. | 30 |
 | custom_hitmarkers_mini_size | The font size for mini hit numbers. | 30 |
+| custom_hitmarkers_dps_enabled | Enables a DPS tracker. | 0 |
+| custom_hitmarkers_dps_pos_x | The horizontal position for the DPS tracker. | 0.0208 |
+| custom_hitmarkers_dps_pos_y | The vertical position for the DPS tracker. | 0.861 |

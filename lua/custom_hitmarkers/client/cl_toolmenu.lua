@@ -143,6 +143,7 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         npcCB = panel:CheckBox( "Enable NPC hitmarkers", "custom_hitmarkers_npc_enabled" )
         entCB = panel:CheckBox( "Enable entity hitmarkers", "custom_hitmarkers_ent_enabled" )
         panel:CheckBox( "Enable hitmarker sounds", "custom_hitmarkers_sound_enabled" )
+        panel:CheckBox( "Enable DPS tracker", "custom_hitmarkers_dps_enabled" )
 
         panel:NumSlider( "Hit duration\n(0 to disable)", "custom_hitmarkers_hit_duration", 0, 10, 1 )
         panel:NumSlider( "Mini hit duration\n(0 to disable)", "custom_hitmarkers_mini_duration", 0, 10, 1 )
@@ -161,6 +162,9 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         panel:NumSlider( "Hit sound volume", "custom_hitmarkers_hit_sound_volume", 0, 4, 1 )
         panel:NumSlider( "Headshot sound volume", "custom_hitmarkers_headshot_sound_volume", 0, 4, 1 )
         panel:NumSlider( "Kill sound volume", "custom_hitmarkers_kill_sound_volume", 0, 4, 1 )
+
+        panel:NumSlider( "DPS pos x", "custom_hitmarkers_dps_pos_x", 0, 1, 4 )
+        panel:NumSlider( "DPS pos y", "custom_hitmarkers_dps_pos_y", 0, 1, 4 )
 
         hitColorPicker = vgui.Create( "DPanel", panel )
         hitColorPicker:SetSize( 200, 185 )

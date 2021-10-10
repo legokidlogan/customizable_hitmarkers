@@ -4,6 +4,16 @@ CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
 local hitmarkerColors = CustomHitmarkers.Colors
 local hitDuration
 local miniHitDuration
+local dpsEnabled
+local damageAccum = 0
+local damageAccumPrev = 0
+local damagePasses = 0
+local damagePassesSinceHit = 0
+local damageLastTime = RealTime()
+local curDPS = 0
+local curDPSstr = ""
+local dpsPosX
+local dpsPosY
 
 local UPDATE_INTERVAL = 0.01
 local ROUND_DECIMALS = 1
@@ -11,11 +21,15 @@ local MINI_SPEED_MIN = 1.5
 local MINI_SPEED_MAX = 3
 local MINI_INERTIA = 0.93
 local MINI_GRAVITY = 0.03
+local DPS_PASS_CUTOFF = 80
+local DPS_INTERVAL = 0.05
+local DPS_SIZE = 30
+local DPS_COLOR = Color( 255, 255, 255, 255 )
 
 local FONT_DATA = {
     font = "Roboto Mono",
     extended = false,
-    size = 30,
+    size = DPS_SIZE,
     weight = 500,
     blursize = 0,
     scanlines = 0,
@@ -34,6 +48,7 @@ local HITMARKERS_ENABLED = CreateClientConVar( "custom_hitmarkers_enabled", 1, t
 local HITMARKERS_NPC_ENABLED = CreateClientConVar( "custom_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
 local HITMARKERS_ENT_ENABLED = CreateClientConVar( "custom_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
 local HITMARKERS_SOUND_ENABLED = CreateClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
+local HITMARKERS_DPS_ENABLED = CreateClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
 
 local HIT_DURATION = CreateClientConVar( "custom_hitmarkers_hit_duration", 3, true, false, "How long large hit numbers will linger for. 0 to disable.", 0, 10 )
 local MINI_DURATION = CreateClientConVar( "custom_hitmarkers_mini_duration", 2.5, true, false, "How long mini hit numbers will linger for. 0 to disable.", 0, 10 )
@@ -52,10 +67,24 @@ local MINI_COLOR = CreateClientConVar( "custom_hitmarkers_mini_hit_color", "255 
 local HIT_SIZE = CreateClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for hit numbers.", 1, 200 )
 local MINI_SIZE = CreateClientConVar( "custom_hitmarkers_mini_size", 30, true, false, "The font size for mini hit numbers.", 1, 200 )
 
+local DPS_POS_X = CreateClientConVar( "custom_hitmarkers_dps_pos_x", 0.02083, true, false, "The horizontal position for the DPS tracker.", 0, 1 )
+local DPS_POS_Y = CreateClientConVar( "custom_hitmarkers_dps_pos_y", 0.861, true, false, "The vertical position for the DPS tracker.", 0, 1 )
+
+surface.CreateFont( "CustomHitmarkers_DPSFont", FONT_DATA )
 FONT_DATA.size = HIT_SIZE:GetInt()
 surface.CreateFont( "CustomHitmarkers_HitFont", FONT_DATA )
 FONT_DATA.size = MINI_SIZE:GetInt()
 surface.CreateFont( "CustomHitmarkers_MiniFont", FONT_DATA )
+
+local function resetDPS()
+    damageAccum = 0
+    damageAccumPrev = 0
+    damagePasses = 0
+    damagePassesSinceHit = 0
+    damageLastTime = RealTime()
+    curDPS = 0
+    curDPSstr = "DPS: " .. tostring( math.Round( curDPS ) )
+end
 
 function CustomHitmarkers.GetColorFromConvar( colorName, fallbackColor )
     local convarName = "custom_hitmarkers_" .. colorName .. "_color"
@@ -140,6 +169,26 @@ cvars.AddChangeCallback( "custom_hitmarkers_ent_enabled", function( _, old, new 
     net.SendToServer()
 end )
 
+cvars.AddChangeCallback( "custom_hitmarkers_dps_enabled", function( _, old, new )
+    dpsEnabled = new ~= "0"
+
+    if dpsEnabled then
+        resetDPS()
+    end
+end )
+
+cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_x", function( _, old, new )
+    local frac = math.Clamp( tonumber( new ) or 0.02083, 0, 1 )
+
+    dpsPosX = ScrW() * frac
+end )
+
+cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_y", function( _, old, new )
+    local frac = math.Clamp( tonumber( new ) or 0.02083, 0, 1 )
+
+    dpsPosY = ScrH() * frac
+end )
+
 cvars.AddChangeCallback( "custom_hitmarkers_hit_size", function( _, old, new )
     local oldVal = tonumber( old ) or 30
     local newVal = tonumber( new )
@@ -177,6 +226,9 @@ CustomHitmarkers.MiniHits = {}
 
 hitDuration = HIT_DURATION:GetFloat() or 3
 miniHitDuration = MINI_DURATION:GetFloat() or 2.5
+dpsEnabled = HITMARKERS_DPS_ENABLED:GetBool()
+dpsPosX = ScrW() * DPS_POS_X:GetFloat()
+dpsPosY = ScrH() * DPS_POS_Y:GetFloat()
 
 local hitScores = CustomHitmarkers.HitScores
 local hitColors = {}
@@ -272,6 +324,43 @@ hook.Add( "HUDPaint", "CustomHitmarkers_DrawHits", function()
 
         draw.SimpleText( tostring( score ), "CustomHitmarkers_HitFont", xPos, yPos, hitColors[ply], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
     end
+
+    if not dpsEnabled then return end
+
+    draw.SimpleText( curDPSstr, "CustomHitmarkers_DPSFont", dpsPosX, dpsPosY, DPS_COLOR, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+end )
+
+timer.Create( "CustomHitmarkers_TrackDPS", DPS_INTERVAL, 0, function()
+    if not dpsEnabled then return end
+
+    if damagePassesSinceHit >= DPS_PASS_CUTOFF then
+        resetDPS()
+
+        return
+    end
+
+    if damageAccum == 0 then return end
+
+    local damageChunk = damageAccum - damageAccumPrev
+
+    damagePasses = damagePasses + 1
+
+    if damageChunk == 0 then
+        damagePassesSinceHit = damagePassesSinceHit + 1
+    else
+        damagePassesSinceHit = damagePassesSinceHit / 2
+    end
+
+    local passRatio = 1 / damagePasses
+    local curTime = RealTime()
+
+    if curTime ~= damageLastTime then
+        curDPS = curDPS * ( 1 - passRatio ) + ( damageChunk ) * passRatio / ( curTime - damageLastTime )
+        curDPSstr = "DPS: " .. tostring( math.Round( curDPS ) )
+    end
+
+    damageAccumPrev = damageAccum
+    damageLastTime = curTime
 end )
 
 net.Receive( "CustomHitmarkers_Hit", function()
@@ -281,6 +370,8 @@ net.Receive( "CustomHitmarkers_Hit", function()
     local headShot = net.ReadBool()
     local hitColor = hitmarkerColors.hit
     local miniHitColor = hitmarkerColors.mini_hit
+
+    damageAccum = damageAccum + dmg
 
     hitScores[ply] = ( hitScores[ply] or 0 ) + dmg
     hitColors[ply] = Color( hitColor.r, hitColor.g, hitColor.b )
