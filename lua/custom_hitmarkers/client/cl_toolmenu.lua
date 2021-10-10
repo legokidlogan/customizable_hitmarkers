@@ -145,10 +145,23 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         panel:CheckBox( "Enable hitmarker sounds", "custom_hitmarkers_sound_enabled" )
         panel:CheckBox( "Enable DPS tracker", "custom_hitmarkers_dps_enabled" )
 
-        panel:NumSlider( "Hit duration\n(0 to disable)", "custom_hitmarkers_hit_duration", 0, 10, 1 )
+        local infoPanel = vgui.Create( "DLabel" )
+
+        updateUsabilityColor( infoPanel, true )
+        infoPanel:SetText(
+            "'Burst hits' show total recent damage to a target\n" ..
+            "'Mini hits' show individual hit numbers"
+        )
+
+        local _, infoY = infoPanel:GetTextSize()
+
+        infoPanel:SetHeight( infoY + 5 )
+        panel:AddItem( infoPanel )
+
+        panel:NumSlider( "Burst hit duration\n(0 to disable)", "custom_hitmarkers_hit_duration", 0, 10, 1 )
         panel:NumSlider( "Mini hit duration\n(0 to disable)", "custom_hitmarkers_mini_duration", 0, 10, 1 )
 
-        panel:NumSlider( "Hit font size", "custom_hitmarkers_hit_size", 1, 200, 0 )
+        panel:NumSlider( "Burst hit font size", "custom_hitmarkers_hit_size", 1, 200, 0 )
         panel:NumSlider( "Mini hit font size", "custom_hitmarkers_mini_size", 1, 200, 0 )
 
         panel:TextEntry( "Hit sound", "custom_hitmarkers_hit_sound" )
@@ -172,7 +185,7 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         miniHitColorPicker = vgui.Create( "DPanel", panel )
         miniHitColorPicker:SetSize( 200, 185 )
     
-        createColorPicker( hitColorPicker, "hit", "Hit color" )
+        createColorPicker( hitColorPicker, "hit", "Burst hit color" )
         createColorPicker( miniHitColorPicker, "mini_hit", "Mini hit color" )
 
         panel:AddItem( hitColorPicker )
