@@ -44,14 +44,18 @@ local FONT_DATA = {
     outline = false,
 }
 
+local convarFlags = { FCVAR_ARCHIVE, FCVAR_REPLICATED }
+
 local HITMARKERS_ENABLED = CreateClientConVar( "custom_hitmarkers_enabled", 1, true, false, "Enables hitmarkers.", 0, 1 )
 local HITMARKERS_NPC_ENABLED = CreateClientConVar( "custom_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
 local HITMARKERS_ENT_ENABLED = CreateClientConVar( "custom_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
 local HITMARKERS_SOUND_ENABLED = CreateClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
 local HITMARKERS_DPS_ENABLED = CreateClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
 
-local HIT_DURATION = CreateClientConVar( "custom_hitmarkers_hit_duration", 3, true, false, "How long large hit numbers will linger for. 0 to disable.", 0, 10 )
-local MINI_DURATION = CreateClientConVar( "custom_hitmarkers_mini_duration", 2.5, true, false, "How long mini hit numbers will linger for. 0 to disable.", 0, 10 )
+local HIT_DURATION = CreateClientConVar( "custom_hitmarkers_hit_duration", -1, true, false, "How long burst hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
+local MINI_DURATION = CreateClientConVar( "custom_hitmarkers_mini_duration", -1, true, false, "How long mini hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
+local HIT_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_hit_duration_default", 3, convarFlags, "How long burst hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
+local MINI_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_mini_duration_default", 2.5, convarFlags, "How long mini hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
 
 local HIT_SOUND = CreateClientConVar( "custom_hitmarkers_hit_sound", "buttons/lightswitch2.wav", true, false, "Sound used for regular hits." )
 local HEADSHOT_SOUND = CreateClientConVar( "custom_hitmarkers_headshot_sound", "buttons/button16.wav", true, false, "Sound used for headshots." )
@@ -61,10 +65,10 @@ local HIT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_hit_sound_volume
 local HEADSHOT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_headshot_sound_volume", 1, true, false, "Volume for headshot sounds.", 0, 4 )
 local KILL_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_kill_sound_volume", 1.5, true, false, "Volume for kill sounds.", 0, 4 )
 
-local HIT_COLOR = CreateClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for hit numbers." )
+local HIT_COLOR = CreateClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for burst hit numbers." )
 local MINI_COLOR = CreateClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
 
-local HIT_SIZE = CreateClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for hit numbers.", 1, 200 )
+local HIT_SIZE = CreateClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for burst hit numbers.", 1, 200 )
 local MINI_SIZE = CreateClientConVar( "custom_hitmarkers_mini_size", 30, true, false, "The font size for mini hit numbers.", 1, 200 )
 
 local DPS_POS_X = CreateClientConVar( "custom_hitmarkers_dps_pos_x", 0.02083, true, false, "The horizontal position for the DPS tracker.", 0, 1 )
@@ -126,26 +130,20 @@ cvars.AddChangeCallback( "custom_hitmarkers_mini_hit_color", function()
 end )
 
 cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, old, new )
-    local oldVal = tonumber( old ) or 3
-    local newVal = tonumber( new )
+    local newVal = tonumber( new ) or -1
 
-    if not newVal then
-        LocalPlayer():ConCommand( "custom_hitmarkers_hit_duration " .. oldVal )
-
-        return
+    if newVal < 0 then
+        newVal = HIT_DURATION_DEFAULT:GetFloat()
     end
 
     hitDuration = newVal
 end )
 
 cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, old, new )
-    local oldVal = tonumber( old ) or 2.5
-    local newVal = tonumber( new )
+    local newVal = tonumber( new ) or -1
 
-    if not newVal then
-        LocalPlayer():ConCommand( "custom_hitmarkers_mini_duration " .. oldVal )
-
-        return
+    if newVal < 0 then
+        newVal = MINI_DURATION_DEFAULT:GetFloat()
     end
 
     miniHitDuration = newVal
@@ -224,8 +222,11 @@ CustomHitmarkers.HitTimes = {}
 CustomHitmarkers.HitPoints = {}
 CustomHitmarkers.MiniHits = {}
 
-hitDuration = HIT_DURATION:GetFloat() or 3
-miniHitDuration = MINI_DURATION:GetFloat() or 2.5
+hitDuration = HIT_DURATION:GetFloat() or -1
+miniHitDuration = MINI_DURATION:GetFloat() or -1
+hitDuration = hitDuration < 0 and HIT_DURATION_DEFAULT:GetFloat() or hitDuration
+miniHitDuration = miniHitDuration < 0 and MINI_DURATION_DEFAULT:GetFloat() or miniHitDuration
+
 dpsEnabled = HITMARKERS_DPS_ENABLED:GetBool()
 dpsPosX = ScrW() * DPS_POS_X:GetFloat()
 dpsPosY = ScrH() * DPS_POS_Y:GetFloat()

@@ -11,6 +11,8 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_ratelimit_cooldown | How long (in seconds) hit events for a player will be ignored after breaching the ratelimit threshold. | 2 |
 | custom_hitmarkers_npc_allowed | Allows players to opt in to NPC hitmarkers. | 1 |
 | custom_hitmarkers_ent_allowed | Allows players to opt in to entity hitmarkers. | 1 |
+| custom_hitmarkers_hit_duration_default | 3 | How long burst hit numbers will linger for. 0 to disable. Default value used for players. |
+| custom_hitmarkers_mini_duration_default | 2.5 | How long mini hit numbers will linger for. 0 to disable. Default value used for players. |
 
 ## Client Convars
 
@@ -20,8 +22,8 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_npc_enabled | Enables hitmarkers for NPCs. | 0 |
 | custom_hitmarkers_ent_enabled | Enables hitmarkers for other entities. | 0 |
 | custom_hitmarkers_sound_enabled | Enables hitmarker sounds. | 1 |
-| custom_hitmarkers_hit_duration | How long large hit numbers will linger for. 0 to disable. | 3 |
-| custom_hitmarkers_mini_duration | How long mini hit numbers will linger for. 0 to disable. | 2.5 |
+| custom_hitmarkers_hit_duration | How long large hit numbers will linger for. 0 to disable. -1 to use server default. | -1 |
+| custom_hitmarkers_mini_duration | How long mini hit numbers will linger for. 0 to disable. -1 to use server default. | -1 |
 | custom_hitmarkers_hit_sound | Sound used for regular hits. | buttons/lightswitch2.wav |
 | custom_hitmarkers_headshot_sound | Sound used for headshots. | buttons/button16.wav |
 | custom_hitmarkers_kill_sound | Sound used for kills. | buttons/combine_button1.wav |
