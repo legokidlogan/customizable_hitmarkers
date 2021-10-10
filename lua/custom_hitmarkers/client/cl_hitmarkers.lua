@@ -232,6 +232,7 @@ dpsPosX = ScrW() * DPS_POS_X:GetFloat()
 dpsPosY = ScrH() * DPS_POS_Y:GetFloat()
 
 local hitScores = CustomHitmarkers.HitScores
+local miniHitCounts = {}
 local hitColors = {}
 local hitTimes = {}
 local hitPoints = {}
@@ -319,11 +320,13 @@ hook.Add( "HUDPaint", "CustomHitmarkers_DrawHits", function()
     end
 
     for ply, score in pairs( hitScores ) do
-        local screenPos = hitPoints[ply]:ToScreen()
-        local xPos = screenPos.x
-        local yPos = screenPos.y
+        if miniHitDuration == 0 or miniHitCounts[ply] ~= 1 then
+            local screenPos = hitPoints[ply]:ToScreen()
+            local xPos = screenPos.x
+            local yPos = screenPos.y
 
-        draw.SimpleText( tostring( score ), "CustomHitmarkers_HitFont", xPos, yPos, hitColors[ply], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+            draw.SimpleText( tostring( score ), "CustomHitmarkers_HitFont", xPos, yPos, hitColors[ply], TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+        end
     end
 
     if not dpsEnabled then return end
@@ -374,6 +377,7 @@ net.Receive( "CustomHitmarkers_Hit", function()
 
     damageAccum = damageAccum + dmg
 
+    miniHitCounts[ply] = ( miniHitCounts[ply] or 0 ) + 1
     hitScores[ply] = ( hitScores[ply] or 0 ) + dmg
     hitColors[ply] = Color( hitColor.r, hitColor.g, hitColor.b )
     hitTimes[ply] = RealTime()
@@ -391,6 +395,7 @@ net.Receive( "CustomHitmarkers_Hit", function()
         Vel = miniHitVel * math.Rand( MINI_SPEED_MIN, MINI_SPEED_MAX ),
         Color = Color( miniHitColor.r, miniHitColor.g, miniHitColor.b ),
         Time = RealTime(),
+        Ply = ply,
     }
 
     CustomHitmarkers.DoSound( headShot and "Headshot" or "Hit" )
@@ -425,6 +430,18 @@ timer.Create( "CustomHitmarkers_UpdatePoints", UPDATE_INTERVAL, 0, function()
         local alpha = 255 * ( 1 - ( curTime - miniHit.Time ) / miniHitDuration )
 
         if alpha < 0 then
+            local miniHitCountPly = miniHitCounts[miniHit.Ply]
+
+            if miniHitCountPly then
+                miniHitCountPly = miniHitCountPly - 1
+
+                if miniHitCountPly < 1 then
+                    miniHitCounts[miniHit.Ply] = nil
+                else
+                    miniHitCounts[miniHit.Ply] = miniHitCountPly
+                end
+            end
+
             table.remove( miniHits, i )
             miniHitCount = miniHitCount - 1
         else
