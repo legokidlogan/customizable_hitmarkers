@@ -37,3 +37,9 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_dps_enabled | Enables a DPS tracker. | 0 |
 | custom_hitmarkers_dps_pos_x | The horizontal position for the DPS tracker. | 0.0208 |
 | custom_hitmarkers_dps_pos_y | The vertical position for the DPS tracker. | 0.861 |
+| custom_hitmarkers_hit_sound_pitch_min | Minimum pitch for hit sounds. 100 is 'normal' pitch. | 90 |
+| custom_hitmarkers_hit_sound_pitch_max | Maximum pitch for hit sounds. 100 is 'normal' pitch. | 110 |
+| custom_hitmarkers_headshot_sound_pitch_min | Minimum pitch for headshot sounds. 100 is 'normal' pitch. | 90 |
+| custom_hitmarkers_headshot_sound_pitch_max | Maximum pitch for headshot sounds. 100 is 'normal' pitch. | 110 |
+| custom_hitmarkers_kill_sound_pitch_min | Minimum pitch for kill sounds. 100 is 'normal' pitch. | 100 |
+| custom_hitmarkers_kill_sound_pitch_max | Maximum pitch for kill sounds. 100 is 'normal' pitch. | 100 |

@@ -237,6 +237,50 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
                 ConVar = "custom_hitmarkers_kill_sound_volume",
             },
         } ) )
+        panel:AddItem( createCollapsibleSliders( panel, "Sound Pitch Settings", {
+            {
+                Text = "Hit sound pitch min",
+                Min = 0,
+                Max = 255,
+                Decimals = 0,
+                ConVar = "custom_hitmarkers_hit_sound_pitch_min",
+            },
+            {
+                Text = "Hit sound pitch max",
+                Min = 0,
+                Max = 255,
+                Decimals = 0,
+                ConVar = "custom_hitmarkers_hit_sound_pitch_max",
+            },
+            {
+                Text = "Headshot sound pitch min",
+                Min = 0,
+                Max = 255,
+                Decimals = 0,
+                ConVar = "custom_hitmarkers_headshot_sound_pitch_min",
+            },
+            {
+                Text = "Headshot sound pitch max",
+                Min = 0,
+                Max = 255,
+                Decimals = 0,
+                ConVar = "custom_hitmarkers_headshot_sound_pitch_max",
+            },
+            {
+                Text = "Kill sound pitch min",
+                Min = 0,
+                Max = 255,
+                Decimals = 0,
+                ConVar = "custom_hitmarkers_kill_sound_pitch_min",
+            },
+            {
+                Text = "Kill sound pitch max",
+                Min = 0,
+                Max = 255,
+                Decimals = 0,
+                ConVar = "custom_hitmarkers_kill_sound_pitch_max",
+            },
+        } ) )
 
         panel:NumSlider( "DPS pos x", "custom_hitmarkers_dps_pos_x", 0, 1, 4 )
         panel:NumSlider( "DPS pos y", "custom_hitmarkers_dps_pos_y", 0, 1, 4 )

@@ -65,6 +65,13 @@ local HIT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_hit_sound_volume
 local HEADSHOT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_headshot_sound_volume", 1, true, false, "Volume for headshot sounds.", 0, 4 )
 local KILL_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_kill_sound_volume", 1.5, true, false, "Volume for kill sounds.", 0, 4 )
 
+local HIT_SOUND_PITCH_MIN = CreateClientConVar( "custom_hitmarkers_hit_sound_pitch_min", 90, true, false, "Minimum pitch for hit sounds. 100 is 'normal' pitch.", 0, 255 )
+local HIT_SOUND_PITCH_MAX = CreateClientConVar( "custom_hitmarkers_hit_sound_pitch_max", 110, true, false, "Maximum pitch for hit sounds. 100 is 'normal' pitch.", 0, 255 )
+local HEADSHOT_SOUND_PITCH_MIN = CreateClientConVar( "custom_hitmarkers_headshot_sound_pitch_min", 90, true, false, "Minimum pitch for headshot sounds. 100 is 'normal' pitch.", 0, 255 )
+local HEADSHOT_SOUND_PITCH_MAX = CreateClientConVar( "custom_hitmarkers_headshot_sound_pitch_max", 110, true, false, "Maximum pitch for headshot sounds. 100 is 'normal' pitch.", 0, 255 )
+local KILL_SOUND_PITCH_MIN = CreateClientConVar( "custom_hitmarkers_kill_sound_pitch_min", 100, true, false, "Minimum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
+local KILL_SOUND_PITCH_MAX = CreateClientConVar( "custom_hitmarkers_kill_sound_pitch_max", 100, true, false, "Maximum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
+
 local HIT_COLOR = CreateClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for burst hit numbers." )
 local MINI_COLOR = CreateClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
 
@@ -242,17 +249,17 @@ CustomHitmarkers.SoundTbl = CustomHitmarkers.SoundTbl or {}
 CustomHitmarkers.SoundTbl.Hit = {
     Path = HIT_SOUND,
     Volume = HIT_SOUND_VOLUME,
-    Pitch = function() return math.Rand( 0.9, 1.1 ) end
+    Pitch = function() return math.Rand( HIT_SOUND_PITCH_MIN:GetFloat(), HIT_SOUND_PITCH_MAX:GetFloat() ) / 100 end
 }
 CustomHitmarkers.SoundTbl.Headshot = {
     Path = HEADSHOT_SOUND,
     Volume = HEADSHOT_SOUND_VOLUME,
-    Pitch = function() return math.Rand( 0.9, 1.1 ) end
+    Pitch = function() return math.Rand( HEADSHOT_SOUND_PITCH_MIN:GetFloat(), HEADSHOT_SOUND_PITCH_MAX:GetFloat() ) / 100 end
 }
 CustomHitmarkers.SoundTbl.Kill = {
     Path = KILL_SOUND,
     Volume = KILL_SOUND_VOLUME,
-    Pitch = 1
+    Pitch = function() return math.Rand( KILL_SOUND_PITCH_MIN:GetFloat(), KILL_SOUND_PITCH_MAX:GetFloat() ) / 100 end
 }
 
 function CustomHitmarkers.DoSound( soundType )
