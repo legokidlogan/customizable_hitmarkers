@@ -112,7 +112,7 @@ end
 
 local ratelimitCheck = CustomHitmarkers.RatelimitCheck
 
-hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg )
+hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg )
     if not IsValid( ent ) then return end
 
     local attacker = dmg:GetAttacker()
@@ -123,14 +123,14 @@ hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, 
     local isPlayer = ent:IsPlayer()
 
     if isNPC then
-        if not npcHitsAllowed or not npcHitUsers[attacker] then return end
+        return
     elseif not isPlayer and ( not entHitsAllowed or not entHitUsers[attacker] ) then
         return
     end
 
     if ratelimitCheck( attacker ) then return end
 
-    local damage = dmg:GetDamage() or 0
+    local damage = math.min( ( dmg:GetDamage() or 0 ) + ( dmg:GetDamageBonus() or 0 ), dmg:GetMaxDamage() or math.huge )
     local pos = dmg:GetDamagePosition()
 
     if not pos or pos == ZERO_VECTOR then
@@ -140,14 +140,6 @@ hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, 
     if not isPlayer then
         local headShot = false
 
-        if isNPC then
-            local headBone = ent:GetAttachment( ent:LookupAttachment( "eyes" ) )
-
-            if headBone then
-                headShot = headBone.Pos:DistToSqr( pos ) <= CustomHitmarkers.HEAD_DIST_SQUARED
-            end
-        end
-
         net.Start( "CustomHitmarkers_Hit" )
         net.WriteEntity( ent )
         net.WriteVector( pos )
@@ -156,11 +148,40 @@ hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, 
         net.Send( attacker )
 
         return
+    else
+        attacker.hitmarkerHeadshots = attacker.hitmarkerHeadshots or {}
+        attacker.hitmarkerHeadshots[ent] = ent:LastHitGroup() == HITGROUP_HEAD
     end
 
     attacker.hitmarkerPoints = attacker.hitmarkerPoints or {}
     attacker.hitmarkerPoints[ent] = pos
-end, HOOK_LOW )
+end )
+
+hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, hitGroup, dmg )
+    if not IsValid( npc ) then return end
+
+    local attacker = dmg:GetAttacker()
+
+    if npc == attacker or not IsValid( attacker ) or not attacker:IsPlayer() or not hitUsers[attacker] then return end
+    if not npcHitsAllowed or not npcHitUsers[attacker] then return end
+
+    if ratelimitCheck( attacker ) then return end
+
+    local damage = math.min( ( dmg:GetDamage() or 0 ) + ( dmg:GetDamageBonus() or 0 ), dmg:GetMaxDamage() or math.huge )
+    local pos = dmg:GetDamagePosition()
+    local headShot = hitGroup == HITGROUP_HEAD
+
+    if not pos or pos == ZERO_VECTOR then
+        pos = npc:WorldSpaceCenter()
+    end
+
+    net.Start( "CustomHitmarkers_Hit" )
+    net.WriteEntity( ent )
+    net.WriteVector( pos )
+    net.WriteFloat( damage )
+    net.WriteBool( headShot )
+    net.Send( attacker )
+end )
 
 hook.Add( "PlayerHurt", "CustomHitmarkers_HitNotify", function( ply, attacker, newHealth, damage )
     if ply == attacker or not IsValid( attacker ) or not attacker:IsPlayer() or not hitUsers[attacker] then return end
@@ -168,17 +189,11 @@ hook.Add( "PlayerHurt", "CustomHitmarkers_HitNotify", function( ply, attacker, n
 
     attacker.hitmarkerPoints = attacker.hitmarkerPoints or {}
     local pos = attacker.hitmarkerPoints[ply]
-    local headShot = false
+    local headShot = attacker.hitmarkerHeadshots[ply] or false
 
     if not pos then
         local chestBone = ply:GetAttachment( ply:LookupAttachment( "chest" ) )
         pos = chestBone and chestBone.Pos or ply:GetPos() + Vector( 0, 0, ply:OBBMaxs().z * 2 / 3  )
-    end
-
-    local headBone = ply:GetAttachment( ply:LookupAttachment( "eyes" ) )
-
-    if headBone then
-        headShot = headBone.Pos:DistToSqr( pos ) <= CustomHitmarkers.HEAD_DIST_SQUARED
     end
 
     net.Start( "CustomHitmarkers_Hit" )
