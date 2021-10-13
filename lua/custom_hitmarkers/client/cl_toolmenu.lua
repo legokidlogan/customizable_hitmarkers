@@ -8,6 +8,7 @@ local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlag
 
 local TEXT_COLOR = Color( 0, 0, 0, 255 )
 local TEXT_COLOR_UNUSABLE = Color( 128, 128, 128, 255 )
+local DIVIDER_COLOR = Color( 128, 128, 128, 255 )
 
 local function createColorPicker( background, colorName, colorNameFancy )
     local storedColor = CustomHitmarkers.GetColorFromConvar( colorName )
@@ -133,6 +134,47 @@ local miniHitColorPicker
 local npcCB
 local entCB
 
+local function createCollapsibleSliders( panel, collapseText, settings )
+    local collapse = vgui.Create( "DCollapsibleCategory", panel )
+    local list = vgui.Create( "DPanelList", collapse )
+    local bottomLine = vgui.Create( "DFrame", list )
+    local skin = panel:GetSkin() or SKIN or {}
+    local lineColor = skin.bg_color_bright or DIVIDER_COLOR
+    local lineHeight = 1
+    local lineMargin = 8
+
+    collapse:SetLabel( collapseText )
+    collapse:SetExpanded( false )
+
+    list:SetSpacing( 5 )
+    list:EnableHorizontal( false )
+    list:EnableVerticalScrollbar( true )
+    collapse:SetContents( list )
+
+    for _, setting in ipairs( settings ) do
+        local slider = vgui.Create( "DNumSlider" )
+
+        slider:SetText( setting.Text )
+        slider:SetMin( setting.Min )
+        slider:SetMax( setting.Max )
+        slider:SetDecimals( setting.Decimals )
+        slider:SetConVar( setting.ConVar )
+        slider:SizeToContents()
+        slider:GetChildren()[3]:SetTextColor( skin.colTextEntryText or TEXT_COLOR )
+        list:AddItem( slider )
+    end
+
+    local listW = list:GetSize()
+
+    bottomLine:SetSize( listW, lineHeight )
+    list:AddItem( bottomLine )
+    bottomLine.Paint = function( _, w, h )
+        draw.RoundedBox( 1, lineMargin / 2, 0, w - lineMargin, h, lineColor )
+    end
+
+    return collapse
+end
+
 hook.Add( "AddToolMenuCategories", "CustomHitmarkers_AddToolMenuCategories", function()
     spawnmenu.AddToolCategory( "Options", "Hitmarkers", "#Hitmarkers" )
 end )
@@ -172,9 +214,29 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
             panel:Button( "Sound Browser", "wire_sound_browser_open" )
         end
 
-        panel:NumSlider( "Hit sound volume", "custom_hitmarkers_hit_sound_volume", 0, 4, 1 )
-        panel:NumSlider( "Headshot sound volume", "custom_hitmarkers_headshot_sound_volume", 0, 4, 1 )
-        panel:NumSlider( "Kill sound volume", "custom_hitmarkers_kill_sound_volume", 0, 4, 1 )
+        panel:AddItem( createCollapsibleSliders( panel, "Sound Volume Settings", {
+            {
+                Text = "Hit sound volume",
+                Min = 0,
+                Max = 4,
+                Decimals = 1,
+                ConVar = "custom_hitmarkers_hit_sound_volume",
+            },
+            {
+                Text = "Headshot sound volume",
+                Min = 0,
+                Max = 4,
+                Decimals = 1,
+                ConVar = "custom_hitmarkers_headshot_sound_volume",
+            },
+            {
+                Text = "Kill sound volume",
+                Min = 0,
+                Max = 4,
+                Decimals = 1,
+                ConVar = "custom_hitmarkers_kill_sound_volume",
+            },
+        } ) )
 
         panel:NumSlider( "DPS pos x", "custom_hitmarkers_dps_pos_x", 0, 1, 4 )
         panel:NumSlider( "DPS pos y", "custom_hitmarkers_dps_pos_y", 0, 1, 4 )
