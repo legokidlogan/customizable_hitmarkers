@@ -112,7 +112,7 @@ end
 
 local ratelimitCheck = CustomHitmarkers.RatelimitCheck
 
-hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg )
+hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg )
     if not IsValid( ent ) then return end
 
     local attacker = dmg:GetAttacker()
@@ -155,7 +155,7 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
 
     attacker.hitmarkerPoints = attacker.hitmarkerPoints or {}
     attacker.hitmarkerPoints[ent] = pos
-end )
+end, HOOK_LOW )
 
 hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, hitGroup, dmg )
     if not IsValid( npc ) then return end
@@ -193,7 +193,7 @@ hook.Add( "PlayerHurt", "CustomHitmarkers_HitNotify", function( ply, attacker, n
 
     if not pos then
         local chestBone = ply:GetAttachment( ply:LookupAttachment( "chest" ) )
-        pos = chestBone and chestBone.Pos or ply:GetPos() + Vector( 0, 0, ply:OBBMaxs().z * 2 / 3  )
+        pos = ( chestBone and chestBone.Pos ) or ( ply:GetPos() + Vector( 0, 0, ply:OBBMaxs().z * 2 / 3  ) )
     end
 
     net.Start( "CustomHitmarkers_Hit" )
