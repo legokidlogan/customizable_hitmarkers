@@ -1,7 +1,11 @@
 CustomHitmarkers = CustomHitmarkers or {}
 CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
+CustomHitmarkers.ClientConVars = CustomHitmarkers.ClientConVars or {}
+CustomHitmarkers.ClientConVarOverrides = CustomHitmarkers.ClientConVarOverrides or {}
 
 local convarFlags = { FCVAR_ARCHIVE, FCVAR_REPLICATED }
+local clConVars = CustomHitmarkers.ClientConVars
+local clConVarOverrides = CustomHitmarkers.ClientConVarOverrides
 
 local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags, "Allows players to opt in to NPC hitmarkers.", 0, 1 )
 local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags, "Allows players to opt in to entity hitmarkers.", 0, 1 )
@@ -76,6 +80,12 @@ local function createColorPicker( background, colorName, colorNameFancy )
             LocalPlayer():ConCommand( "custom_hitmarkers_" .. colorName .. "_color " .. col.r .. " " .. col.g .. " " .. col.b )
         end
     end
+
+    hook.Add( "CustomHitmarkers_SetColor", "CustomHitmarkers_UpdateColorPicker_" .. colorName, function( colName, col )
+        if colName ~= colorName or col == storedColor then return end
+
+        updateColors( col, "concmd" )
+    end )
 
     background:SetBackgroundColor( Color( 255, 255, 255, 0 ) )
     updateColors( storedColor, "concmd" )
@@ -181,6 +191,21 @@ end )
 
 hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
     spawnmenu.AddToolMenuOption( "Options", "Hitmarkers", "custom_hitmarkers", "#Hitmarkers", "", "", function( panel )
+        pcall( function() -- ControlPresets only exists in certain gamemodes
+            local presetControl = vgui.Create( "ControlPresets", panel )
+            local defaults = {}
+
+            for cvName, cv in pairs( clConVars ) do
+                presetControl:AddConVar( cvName )
+                defaults[cvName] = ( clConVarOverrides[cvName] or cv ):GetDefault()
+            end
+
+            presets.Add( "custom_hitmarkers", "Default", defaults )
+            presetControl:SetPreset( "custom_hitmarkers" )
+
+            panel:AddItem( presetControl )
+        end )
+
         panel:CheckBox( "Enable hitmarkers", "custom_hitmarkers_enabled" )
         npcCB = panel:CheckBox( "Enable NPC hitmarkers", "custom_hitmarkers_npc_enabled" )
         entCB = panel:CheckBox( "Enable entity hitmarkers", "custom_hitmarkers_ent_enabled" )

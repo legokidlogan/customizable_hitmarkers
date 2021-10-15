@@ -1,5 +1,7 @@
 CustomHitmarkers = CustomHitmarkers or {}
 CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
+CustomHitmarkers.ClientConVars = CustomHitmarkers.ClientConVars or {}
+CustomHitmarkers.ClientConVarOverrides = CustomHitmarkers.ClientConVarOverrides or {}
 
 local hitmarkerColors = CustomHitmarkers.Colors
 local hitDuration
@@ -46,42 +48,54 @@ local FONT_DATA = {
 }
 
 local convarFlags = { FCVAR_ARCHIVE, FCVAR_REPLICATED }
+local clConVars = CustomHitmarkers.ClientConVars
+local clConVarOverrides = CustomHitmarkers.ClientConVarOverrides
 
-local HITMARKERS_ENABLED = CreateClientConVar( "custom_hitmarkers_enabled", 1, true, false, "Enables hitmarkers.", 0, 1 )
-local HITMARKERS_NPC_ENABLED = CreateClientConVar( "custom_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
-local HITMARKERS_ENT_ENABLED = CreateClientConVar( "custom_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
-local HITMARKERS_SOUND_ENABLED = CreateClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
-local HITMARKERS_DPS_ENABLED = CreateClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
-local HITMARKERS_ROUND_ENABLED = CreateClientConVar( "custom_hitmarkers_round_enabled", 1, true, false, "Rounds up damage numbers.", 0, 1 )
+local function createHitmarkerClientConVar( name, default, save, userinfo, text, min, max )
+    local convar = CreateClientConVar( name, default, save, userinfo, text, min, max )
+    clConVars[name] = convar
 
-local HIT_DURATION = CreateClientConVar( "custom_hitmarkers_hit_duration", -1, true, false, "How long burst hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
-local MINI_DURATION = CreateClientConVar( "custom_hitmarkers_mini_duration", -1, true, false, "How long mini hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
+    return convar
+end
+
+local HITMARKERS_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_enabled", 1, true, false, "Enables hitmarkers.", 0, 1 )
+local HITMARKERS_NPC_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
+local HITMARKERS_ENT_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
+local HITMARKERS_SOUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
+local HITMARKERS_DPS_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
+local HITMARKERS_ROUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_round_enabled", 1, true, false, "Rounds up damage numbers.", 0, 1 )
+
+local HIT_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_hit_duration", -1, true, false, "How long burst hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
+local MINI_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_mini_duration", -1, true, false, "How long mini hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
 local HIT_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_hit_duration_default", 3, convarFlags, "How long burst hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
 local MINI_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_mini_duration_default", 2.5, convarFlags, "How long mini hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
 
-local HIT_SOUND = CreateClientConVar( "custom_hitmarkers_hit_sound", "buttons/lightswitch2.wav", true, false, "Sound used for regular hits." )
-local HEADSHOT_SOUND = CreateClientConVar( "custom_hitmarkers_headshot_sound", "buttons/button16.wav", true, false, "Sound used for headshots." )
-local KILL_SOUND = CreateClientConVar( "custom_hitmarkers_kill_sound", "buttons/combine_button1.wav", true, false, "Sound used for kills." )
+local HIT_SOUND = createHitmarkerClientConVar( "custom_hitmarkers_hit_sound", "buttons/lightswitch2.wav", true, false, "Sound used for regular hits." )
+local HEADSHOT_SOUND = createHitmarkerClientConVar( "custom_hitmarkers_headshot_sound", "buttons/button16.wav", true, false, "Sound used for headshots." )
+local KILL_SOUND = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound", "buttons/combine_button1.wav", true, false, "Sound used for kills." )
 
-local HIT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_hit_sound_volume", 1.5, true, false, "Volume for hit sounds.", 0, 4 )
-local HEADSHOT_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_headshot_sound_volume", 1, true, false, "Volume for headshot sounds.", 0, 4 )
-local KILL_SOUND_VOLUME = CreateClientConVar( "custom_hitmarkers_kill_sound_volume", 1.5, true, false, "Volume for kill sounds.", 0, 4 )
+local HIT_SOUND_VOLUME = createHitmarkerClientConVar( "custom_hitmarkers_hit_sound_volume", 1.5, true, false, "Volume for hit sounds.", 0, 4 )
+local HEADSHOT_SOUND_VOLUME = createHitmarkerClientConVar( "custom_hitmarkers_headshot_sound_volume", 1, true, false, "Volume for headshot sounds.", 0, 4 )
+local KILL_SOUND_VOLUME = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound_volume", 1.5, true, false, "Volume for kill sounds.", 0, 4 )
 
-local HIT_SOUND_PITCH_MIN = CreateClientConVar( "custom_hitmarkers_hit_sound_pitch_min", 90, true, false, "Minimum pitch for hit sounds. 100 is 'normal' pitch.", 0, 255 )
-local HIT_SOUND_PITCH_MAX = CreateClientConVar( "custom_hitmarkers_hit_sound_pitch_max", 110, true, false, "Maximum pitch for hit sounds. 100 is 'normal' pitch.", 0, 255 )
-local HEADSHOT_SOUND_PITCH_MIN = CreateClientConVar( "custom_hitmarkers_headshot_sound_pitch_min", 90, true, false, "Minimum pitch for headshot sounds. 100 is 'normal' pitch.", 0, 255 )
-local HEADSHOT_SOUND_PITCH_MAX = CreateClientConVar( "custom_hitmarkers_headshot_sound_pitch_max", 110, true, false, "Maximum pitch for headshot sounds. 100 is 'normal' pitch.", 0, 255 )
-local KILL_SOUND_PITCH_MIN = CreateClientConVar( "custom_hitmarkers_kill_sound_pitch_min", 100, true, false, "Minimum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
-local KILL_SOUND_PITCH_MAX = CreateClientConVar( "custom_hitmarkers_kill_sound_pitch_max", 100, true, false, "Maximum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
+local HIT_SOUND_PITCH_MIN = createHitmarkerClientConVar( "custom_hitmarkers_hit_sound_pitch_min", 90, true, false, "Minimum pitch for hit sounds. 100 is 'normal' pitch.", 0, 255 )
+local HIT_SOUND_PITCH_MAX = createHitmarkerClientConVar( "custom_hitmarkers_hit_sound_pitch_max", 110, true, false, "Maximum pitch for hit sounds. 100 is 'normal' pitch.", 0, 255 )
+local HEADSHOT_SOUND_PITCH_MIN = createHitmarkerClientConVar( "custom_hitmarkers_headshot_sound_pitch_min", 90, true, false, "Minimum pitch for headshot sounds. 100 is 'normal' pitch.", 0, 255 )
+local HEADSHOT_SOUND_PITCH_MAX = createHitmarkerClientConVar( "custom_hitmarkers_headshot_sound_pitch_max", 110, true, false, "Maximum pitch for headshot sounds. 100 is 'normal' pitch.", 0, 255 )
+local KILL_SOUND_PITCH_MIN = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound_pitch_min", 100, true, false, "Minimum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
+local KILL_SOUND_PITCH_MAX = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound_pitch_max", 100, true, false, "Maximum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
 
-local HIT_COLOR = CreateClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for burst hit numbers." )
-local MINI_COLOR = CreateClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
+local HIT_COLOR = createHitmarkerClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for burst hit numbers." )
+local MINI_COLOR = createHitmarkerClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
 
-local HIT_SIZE = CreateClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for burst hit numbers.", 1, 200 )
-local MINI_SIZE = CreateClientConVar( "custom_hitmarkers_mini_size", 30, true, false, "The font size for mini hit numbers.", 1, 200 )
+local HIT_SIZE = createHitmarkerClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for burst hit numbers.", 1, 200 )
+local MINI_SIZE = createHitmarkerClientConVar( "custom_hitmarkers_mini_size", 30, true, false, "The font size for mini hit numbers.", 1, 200 )
 
-local DPS_POS_X = CreateClientConVar( "custom_hitmarkers_dps_pos_x", 0.02083, true, false, "The horizontal position for the DPS tracker.", 0, 1 )
-local DPS_POS_Y = CreateClientConVar( "custom_hitmarkers_dps_pos_y", 0.861, true, false, "The vertical position for the DPS tracker.", 0, 1 )
+local DPS_POS_X = createHitmarkerClientConVar( "custom_hitmarkers_dps_pos_x", 0.02083, true, false, "The horizontal position for the DPS tracker.", 0, 1 )
+local DPS_POS_Y = createHitmarkerClientConVar( "custom_hitmarkers_dps_pos_y", 0.861, true, false, "The vertical position for the DPS tracker.", 0, 1 )
+
+clConVarOverrides.custom_hitmarkers_hit_duration = HIT_DURATION_DEFAULT
+clConVarOverrides.custom_hitmarkers_mini_duration = MINI_DURATION_DEFAULT
 
 surface.CreateFont( "CustomHitmarkers_DPSFont", FONT_DATA )
 FONT_DATA.size = HIT_SIZE:GetInt()
@@ -116,6 +130,8 @@ function CustomHitmarkers.SetColorFromConvar( colorName, fallbackStr, fallbackCo
 
     if result then
         hitmarkerColors[colorName] = col
+
+        hook.Run( "CustomHitmarkers_SetColor", colorName, col )
     else
         hitmarkerColors[colorName] = fallbackColor or Color( 255, 255, 255, 255 )
         LocalPlayer():ConCommand( convarName .. " " .. ( fallbackStr or "255 255 255" ) )
