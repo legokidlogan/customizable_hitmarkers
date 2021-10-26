@@ -112,7 +112,7 @@ end
 
 local ratelimitCheck = CustomHitmarkers.RatelimitCheck
 
-hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg )
+hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg )
     if not IsValid( ent ) then return end
 
     local attacker = dmg:GetAttacker()
@@ -131,31 +131,20 @@ hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, 
     if ratelimitCheck( attacker ) then return end
 
     local damage = math.min( ( dmg:GetDamage() or 0 ) + ( dmg:GetDamageBonus() or 0 ), dmg:GetMaxDamage() or math.huge )
+    local headShot = isPlayer and ent:LastHitGroup() == HITGROUP_HEAD
     local pos = dmg:GetDamagePosition()
 
     if not pos or pos == ZERO_VECTOR then
         pos = ent:WorldSpaceCenter()
     end
 
-    if not isPlayer then
-        local headShot = false
-
-        net.Start( "CustomHitmarkers_Hit" )
-        net.WriteEntity( ent )
-        net.WriteVector( pos )
-        net.WriteFloat( damage )
-        net.WriteBool( headShot )
-        net.Send( attacker )
-
-        return
-    else
-        attacker.hitmarkerHeadshots = attacker.hitmarkerHeadshots or {}
-        attacker.hitmarkerHeadshots[ent] = ent:LastHitGroup() == HITGROUP_HEAD
-    end
-
-    attacker.hitmarkerPoints = attacker.hitmarkerPoints or {}
-    attacker.hitmarkerPoints[ent] = pos
-end, HOOK_LOW )
+    net.Start( "CustomHitmarkers_Hit" )
+    net.WriteEntity( ent )
+    net.WriteVector( pos )
+    net.WriteFloat( damage )
+    net.WriteBool( headShot )
+    net.Send( attacker )
+end )
 
 hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, hitGroup, dmg )
     if not IsValid( npc ) then return end
@@ -181,29 +170,6 @@ hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, h
     net.WriteFloat( damage )
     net.WriteBool( headShot )
     net.Send( attacker )
-end )
-
-hook.Add( "PlayerHurt", "CustomHitmarkers_HitNotify", function( ply, attacker, newHealth, damage )
-    if ply == attacker or not IsValid( attacker ) or not attacker:IsPlayer() or not hitUsers[attacker] then return end
-    if ratelimitCheck( attacker ) then return end
-
-    attacker.hitmarkerPoints = attacker.hitmarkerPoints or {}
-    local pos = attacker.hitmarkerPoints[ply]
-    local headShot = attacker.hitmarkerHeadshots[ply] or false
-
-    if not pos then
-        local chestBone = ply:GetAttachment( ply:LookupAttachment( "chest" ) )
-        pos = ( chestBone and chestBone.Pos ) or ( ply:GetPos() + Vector( 0, 0, ply:OBBMaxs().z * 2 / 3  ) )
-    end
-
-    net.Start( "CustomHitmarkers_Hit" )
-    net.WriteEntity( ply )
-    net.WriteVector( pos )
-    net.WriteFloat( damage )
-    net.WriteBool( headShot )
-    net.Send( attacker )
-
-    attacker.hitmarkerPoints[ply] = nil
 end )
 
 hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attacker )
