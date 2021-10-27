@@ -81,6 +81,15 @@ cvars.AddChangeCallback( "custom_hitmarkers_ent_allowed", function( _, old, new 
     net.Broadcast()
 end )
 
+function CustomHitmarkers.SendHit( ent, pos, damage, headShot, attacker )
+    net.Start( "CustomHitmarkers_Hit" )
+    net.WriteEntity( ent )
+    net.WriteVector( pos )
+    net.WriteFloat( damage )
+    net.WriteBool( headShot )
+    net.Send( attacker )
+end
+
 function CustomHitmarkers.RatelimitCheck( attacker )
     if not ratelimitEnabled then return end
     if ratelimitBlocked[attacker] then return true end
@@ -130,7 +139,17 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
 
     if ratelimitCheck( attacker ) then return end
 
-    local damage = math.min( ( dmg:GetDamage() or 0 ) + ( dmg:GetDamageBonus() or 0 ), dmg:GetMaxDamage() or math.huge )
+    local damage = ( dmg:GetDamage() or 0 ) + ( dmg:GetDamageBonus() or 0 )
+    local numHits = math.max( dmg:GetMaxDamage() or math.huge, 1 )
+
+    if numHits < damage and damage % numHits == 0 then
+        numHits = damage / numHits -- Actually becomes the number of hits now
+        damage = damage / numHits
+    else
+        damage = math.min( damage, numHits )
+        numHits = 1
+    end
+
     local headShot = isPlayer and ent:LastHitGroup() == HITGROUP_HEAD
     local pos = dmg:GetDamagePosition()
 
@@ -138,12 +157,22 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
         pos = ent:WorldSpaceCenter()
     end
 
-    net.Start( "CustomHitmarkers_Hit" )
-    net.WriteEntity( ent )
-    net.WriteVector( pos )
-    net.WriteFloat( damage )
-    net.WriteBool( headShot )
-    net.Send( attacker )
+    if numHits == 1 then
+        CustomHitmarkers.SendHit( ent, pos, damage, headShot, attacker )
+    else
+        local radius = ( ent:BoundingRadius() or 20 ) / 3
+
+        CustomHitmarkers.SendHit( ent, pos, damage, headShot, attacker )
+
+        for i = 2, numHits do
+            local theta = math.Rand( 0, 2 * math.pi )
+            local phi = math.Rand( 0, 2 * math.pi )
+            local dist = math.Rand( 0, radius )
+            local offset = Vector( math.sin( theta ) * math.sin( phi ), math.cos( theta ), math.sin( theta ) * math.cos( phi ) ) * dist
+
+            CustomHitmarkers.SendHit( ent, pos + offset, damage, headShot, attacker )
+        end
+    end
 end )
 
 hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, hitGroup, dmg )
@@ -164,12 +193,7 @@ hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, h
         pos = npc:WorldSpaceCenter()
     end
 
-    net.Start( "CustomHitmarkers_Hit" )
-    net.WriteEntity( ent )
-    net.WriteVector( pos )
-    net.WriteFloat( damage )
-    net.WriteBool( headShot )
-    net.Send( attacker )
+    CustomHitmarkers.SendHit( ent, pos, damage, headShot, attacker )
 end )
 
 hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attacker )
