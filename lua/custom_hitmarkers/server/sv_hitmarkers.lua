@@ -140,7 +140,9 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
     if ratelimitCheck( attacker ) then return end
 
     local damage = ( dmg:GetDamage() or 0 ) + ( dmg:GetDamageBonus() or 0 )
-    local numHits = math.max( dmg:GetMaxDamage() or math.huge, 1 )
+    local numHits = dmg:GetMaxDamage() or math.huge
+
+    numHits = math.max( numHits <= 0 and damage or numHits, 1 )
 
     if numHits < damage and damage % numHits == 0 then
         numHits = damage / numHits -- Actually becomes the number of hits now
