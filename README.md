@@ -44,3 +44,4 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_headshot_sound_pitch_max | Maximum pitch for headshot sounds. 100 is 'normal' pitch. | 110 |
 | custom_hitmarkers_kill_sound_pitch_min | Minimum pitch for kill sounds. 100 is 'normal' pitch. | 100 |
 | custom_hitmarkers_kill_sound_pitch_max | Maximum pitch for kill sounds. 100 is 'normal' pitch. | 100 |
+| custom_hitmarkers_block_zeros | Don't display hits with a damage value of 0. | 1 |

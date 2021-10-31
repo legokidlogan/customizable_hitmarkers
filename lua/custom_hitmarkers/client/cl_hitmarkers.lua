@@ -7,6 +7,7 @@ local hitmarkerColors = CustomHitmarkers.Colors
 local hitDuration
 local miniHitDuration
 local roundUp
+local blockZeros
 local dpsEnabled
 local damageAccum = 0
 local damageAccumPrev = 0
@@ -64,6 +65,7 @@ local HITMARKERS_ENT_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_e
 local HITMARKERS_SOUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
 local HITMARKERS_DPS_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
 local HITMARKERS_ROUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_round_enabled", 1, true, false, "Rounds up damage numbers.", 0, 1 )
+local HITMARKERS_BLOCK_ZEROS = createHitmarkerClientConVar( "custom_hitmarkers_block_zeros", 1, true, false, "Don't display hits with a damage value of 0.", 0, 1 )
 
 local HIT_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_hit_duration", -1, true, false, "How long burst hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
 local MINI_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_mini_duration", -1, true, false, "How long mini hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
@@ -204,6 +206,10 @@ cvars.AddChangeCallback( "custom_hitmarkers_round_enabled", function( _, old, ne
     roundUp = new ~= "0"
 end )
 
+cvars.AddChangeCallback( "custom_hitmarkers_block_zeros", function( _, old, new )
+    blockZeros = new ~= "0"
+end )
+
 cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_x", function( _, old, new )
     local frac = math.Clamp( tonumber( new ) or 0.02083, 0, 1 )
 
@@ -257,6 +263,7 @@ hitDuration = hitDuration < 0 and HIT_DURATION_DEFAULT:GetFloat() or hitDuration
 miniHitDuration = miniHitDuration < 0 and MINI_DURATION_DEFAULT:GetFloat() or miniHitDuration
 
 roundUp = HITMARKERS_ROUND_ENABLED:GetBool()
+blockZeros = HITMARKERS_BLOCK_ZEROS:GetBool()
 
 dpsEnabled = HITMARKERS_DPS_ENABLED:GetBool()
 dpsPosX = ScrW() * DPS_POS_X:GetFloat()
@@ -409,6 +416,8 @@ net.Receive( "CustomHitmarkers_Hit", function()
     if roundUp then
         dmg = math.ceil( dmg )
     end
+
+    if blockZeros and dmg == 0 then return end
 
     damageAccum = damageAccum + dmg
 
