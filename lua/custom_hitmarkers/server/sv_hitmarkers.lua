@@ -121,7 +121,8 @@ end
 
 local ratelimitCheck = CustomHitmarkers.RatelimitCheck
 
-hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg )
+hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg, took )
+    if not took then return end
     if not IsValid( ent ) then return end
 
     local attacker = dmg:GetAttacker()
