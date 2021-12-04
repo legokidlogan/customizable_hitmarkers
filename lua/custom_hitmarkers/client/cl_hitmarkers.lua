@@ -444,8 +444,6 @@ net.Receive( "CustomHitmarkers_Hit", function()
     local hitColor = hitmarkerColors.hit
     local miniHitColor = hitmarkerColors.mini_hit
 
-    print( numHits )
-
     if numHits <= 1 then
         customHitmarkersIncomming( ply, pos, dmg, headShot, hitColor, miniHitColor )
     else
