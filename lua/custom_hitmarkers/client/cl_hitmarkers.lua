@@ -405,14 +405,7 @@ timer.Create( "CustomHitmarkers_TrackDPS", DPS_INTERVAL, 0, function()
     damageLastTime = curTime
 end )
 
-net.Receive( "CustomHitmarkers_Hit", function()
-    local ply = net.ReadEntity()
-    local pos = net.ReadVector()
-    local dmg = math.Round( net.ReadFloat(), ROUND_DECIMALS )
-    local headShot = net.ReadBool()
-    local hitColor = hitmarkerColors.hit
-    local miniHitColor = hitmarkerColors.mini_hit
-
+local function customHitmarkersIncomming( ply, pos, dmg, headShot, hitColor, miniHitColor )
     if roundUp then
         dmg = math.ceil( dmg )
     end
@@ -443,6 +436,33 @@ net.Receive( "CustomHitmarkers_Hit", function()
     }
 
     CustomHitmarkers.DoSound( headShot and "Headshot" or "Hit" )
+end
+
+net.Receive( "CustomHitmarkers_Hit", function()
+    local ply = net.ReadEntity()
+    local pos = net.ReadVector()
+    local dmg = math.Round( net.ReadFloat(), ROUND_DECIMALS )
+    local headShot = net.ReadBool()
+    local numHits = net.ReadInt( 9 )
+    local hitColor = hitmarkerColors.hit
+    local miniHitColor = hitmarkerColors.mini_hit
+
+    print( numHits )
+
+    if numHits <= 1 then
+        customHitmarkersIncomming( ply, pos, dmg, headShot, hitColor, miniHitColor )
+    else
+        local radius = ( ply:BoundingRadius() or 20 ) / 3
+        for _ = 1, numHits do
+            local theta = math.Rand( 0, 2 * math.pi )
+            local phi = math.Rand( 0, 2 * math.pi )
+            local dist = math.Rand( 0, radius )
+            local offset = Vector( math.sin( theta ) * math.sin( phi ), math.cos( theta ), math.sin( theta ) * math.cos( phi ) ) * dist
+            local hitDmg = dmg / numHits
+
+            customHitmarkersIncomming( ply, pos + offset, hitDmg, headShot, hitColor, miniHitColor )
+        end
+    end
 end )
 
 net.Receive( "CustomHitmarkers_Kill", function()
