@@ -142,8 +142,6 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
     local numHits = math.Round( dmg:GetDamage() / dmg:GetMaxDamage() )
     local damage = dmg:GetDamage()
 
-    print( numHits )
-
     local headShot = isPlayer and ent:LastHitGroup() == HITGROUP_HEAD
     local pos = dmg:GetDamagePosition()
 
