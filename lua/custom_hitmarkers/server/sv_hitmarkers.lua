@@ -182,7 +182,6 @@ hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attack
     if ply == attacker or not hitUsers[attacker] then return end
 
     net.Start( "CustomHitmarkers_Kill" )
-    net.WriteEntity( ply )
     net.Send( attacker )
 end )
 
@@ -190,7 +189,6 @@ hook.Add( "OnNPCKilled", "CustomHitmarkers_KillNotify", function( npc, attacker 
     if not hitUsers[attacker] or not npcHitUsers[attacker] then return end
 
     net.Start( "CustomHitmarkers_Kill" )
-    net.WriteEntity( npc )
     net.Send( attacker )
 end )
 

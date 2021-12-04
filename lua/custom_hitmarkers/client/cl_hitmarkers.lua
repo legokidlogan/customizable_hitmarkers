@@ -466,8 +466,6 @@ net.Receive( "CustomHitmarkers_Hit", function()
 end )
 
 net.Receive( "CustomHitmarkers_Kill", function()
-    local ply = net.ReadEntity()
-
     CustomHitmarkers.DoSound( "Kill" )
 end )
 
