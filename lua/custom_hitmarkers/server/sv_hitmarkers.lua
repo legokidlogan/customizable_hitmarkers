@@ -18,9 +18,6 @@ local RATELIMIT_COOLDOWN = CreateConVar( "custom_hitmarkers_ratelimit_cooldown",
 local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags2, "Allows players to opt in to NPC hitmarkers.", 0, 1 )
 local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags2, "Allows players to opt in to entity hitmarkers.", 0, 1 )
 
-local HIT_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_hit_duration_default", 3, convarFlags2, "How long burst hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
-local MINI_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_mini_duration_default", 2.5, convarFlags2, "How long mini hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
-
 local ZERO_VECTOR = Vector( 0, 0, 0 )
 
 local hitUsers = CustomHitmarkers.HitUsers
@@ -61,7 +58,7 @@ cvars.AddChangeCallback( "custom_hitmarkers_ratelimit_cooldown", function( _, ol
     ratelimitCooldown = tonumber( new ) or tonumber( old ) or 2
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_npc_allowed", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_npc_allowed", function( _, _, new )
     local state = new ~= "0"
 
     npcHitsAllowed = state
@@ -71,7 +68,7 @@ cvars.AddChangeCallback( "custom_hitmarkers_npc_allowed", function( _, old, new 
     net.Broadcast()
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_ent_allowed", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_ent_allowed", function( _, _, new )
     local state = new ~= "0"
 
     entHitsAllowed = state
@@ -185,7 +182,7 @@ hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attack
     net.Send( attacker )
 end )
 
-hook.Add( "OnNPCKilled", "CustomHitmarkers_KillNotify", function( npc, attacker )
+hook.Add( "OnNPCKilled", "CustomHitmarkers_KillNotify", function( _, attacker )
     if not hitUsers[attacker] or not npcHitUsers[attacker] then return end
 
     net.Start( "CustomHitmarkers_Kill" )

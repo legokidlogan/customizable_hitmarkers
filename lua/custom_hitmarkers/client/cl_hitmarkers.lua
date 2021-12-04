@@ -87,9 +87,6 @@ local HEADSHOT_SOUND_PITCH_MAX = createHitmarkerClientConVar( "custom_hitmarkers
 local KILL_SOUND_PITCH_MIN = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound_pitch_min", 100, true, false, "Minimum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
 local KILL_SOUND_PITCH_MAX = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound_pitch_max", 100, true, false, "Maximum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
 
-local HIT_COLOR = createHitmarkerClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for burst hit numbers." )
-local MINI_COLOR = createHitmarkerClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
-
 local HIT_SIZE = createHitmarkerClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for burst hit numbers.", 1, 200 )
 local MINI_SIZE = createHitmarkerClientConVar( "custom_hitmarkers_mini_size", 30, true, false, "The font size for mini hit numbers.", 1, 200 )
 
@@ -156,7 +153,7 @@ cvars.AddChangeCallback( "custom_hitmarkers_mini_hit_color", function()
     CustomHitmarkers.SetColorFromConvar( "mini_hit", "255 0 0", Color( 255, 0, 0, 255 ) )
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, _, new )
     local newVal = tonumber( new ) or -1
 
     if newVal < 0 then
@@ -166,7 +163,7 @@ cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, old, new
     hitDuration = newVal
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, _, new )
     local newVal = tonumber( new ) or -1
 
     if newVal < 0 then
@@ -176,25 +173,25 @@ cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, old, ne
     miniHitDuration = newVal
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_enabled", function( _, _, new )
     net.Start( "CustomHitmarkers_EnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_npc_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_npc_enabled", function( _, _, new )
     net.Start( "CustomHitmarkers_NPCEnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_ent_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_ent_enabled", function( _, _, new )
     net.Start( "CustomHitmarkers_EntEnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_dps_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_dps_enabled", function( _, _, new )
     dpsEnabled = new ~= "0"
 
     if dpsEnabled then
@@ -202,21 +199,21 @@ cvars.AddChangeCallback( "custom_hitmarkers_dps_enabled", function( _, old, new 
     end
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_round_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_round_enabled", function( _, _, new )
     roundUp = new ~= "0"
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_block_zeros", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_block_zeros", function( _, _, new )
     blockZeros = new ~= "0"
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_x", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_x", function( _, _, new )
     local frac = math.Clamp( tonumber( new ) or 0.02083, 0, 1 )
 
     dpsPosX = ScrW() * frac
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_y", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_y", function( _, _, new )
     local frac = math.Clamp( tonumber( new ) or 0.02083, 0, 1 )
 
     dpsPosY = ScrH() * frac
@@ -294,7 +291,7 @@ CustomHitmarkers.SoundTbl.Kill = {
 }
 
 function CustomHitmarkers.DoSound( soundType )
-    if not HITMARKERS_SOUND_ENABLED:GetBool() then return end 
+    if not HITMARKERS_SOUND_ENABLED:GetBool() then return end
 
     local snd = CustomHitmarkers.SoundTbl[soundType]
 
@@ -397,7 +394,7 @@ timer.Create( "CustomHitmarkers_TrackDPS", DPS_INTERVAL, 0, function()
     local curTime = RealTime()
 
     if curTime ~= damageLastTime then
-        curDPS = curDPS * ( 1 - passRatio ) + ( damageChunk ) * passRatio / ( curTime - damageLastTime )
+        curDPS = curDPS * ( 1 - passRatio ) + damageChunk * passRatio / ( curTime - damageLastTime )
         curDPSstr = "DPS: " .. tostring( math.Round( curDPS ) )
     end
 
