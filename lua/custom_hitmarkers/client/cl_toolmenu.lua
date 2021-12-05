@@ -211,7 +211,7 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         entCB = panel:CheckBox( "Enable entity hitmarkers", "custom_hitmarkers_ent_enabled" )
         panel:CheckBox( "Enable hitmarker sounds", "custom_hitmarkers_sound_enabled" )
         panel:CheckBox( "Enable DPS tracker", "custom_hitmarkers_dps_enabled" )
-        panel:CheckBox( "Round up damage numbers", "custom_hitmarkers_round_enabled" )
+        panel:CheckBox( "Round damage numbers", "custom_hitmarkers_round_enabled" )
         panel:CheckBox( "Block zero-damage hits", "custom_hitmarkers_block_zeros" )
 
         local infoPanel = vgui.Create( "DLabel" )
