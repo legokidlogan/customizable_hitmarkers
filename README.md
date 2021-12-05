@@ -22,7 +22,7 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_npc_enabled | Enables hitmarkers for NPCs. | 0 |
 | custom_hitmarkers_ent_enabled | Enables hitmarkers for other entities. | 0 |
 | custom_hitmarkers_sound_enabled | Enables hitmarker sounds. | 1 |
-| custom_hitmarkers_round_enabled | Rounds up damage numbers. | 1 |
+| custom_hitmarkers_round_enabled | Rounds damage numbers. | 1 |
 | custom_hitmarkers_hit_duration | How long large hit numbers will linger for. 0 to disable. -1 to use server default. | -1 |
 | custom_hitmarkers_mini_duration | How long mini hit numbers will linger for. 0 to disable. -1 to use server default. | -1 |
 | custom_hitmarkers_hit_sound | Sound used for regular hits. | buttons/lightswitch2.wav |

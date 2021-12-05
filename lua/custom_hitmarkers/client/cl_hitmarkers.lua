@@ -6,7 +6,7 @@ CustomHitmarkers.ClientConVarOverrides = CustomHitmarkers.ClientConVarOverrides 
 local hitmarkerColors = CustomHitmarkers.Colors
 local hitDuration
 local miniHitDuration
-local roundUp
+local roundEnabled
 local blockZeros
 local dpsEnabled
 local damageAccum = 0
@@ -64,7 +64,7 @@ local HITMARKERS_NPC_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_n
 local HITMARKERS_ENT_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
 local HITMARKERS_SOUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
 local HITMARKERS_DPS_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
-local HITMARKERS_ROUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_round_enabled", 1, true, false, "Rounds up damage numbers.", 0, 1 )
+local HITMARKERS_ROUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_round_enabled", 1, true, false, "Rounds damage numbers.", 0, 1 )
 local HITMARKERS_BLOCK_ZEROS = createHitmarkerClientConVar( "custom_hitmarkers_block_zeros", 1, true, false, "Don't display hits with a damage value of 0.", 0, 1 )
 
 local HIT_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_hit_duration", -1, true, false, "How long burst hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
@@ -156,7 +156,7 @@ cvars.AddChangeCallback( "custom_hitmarkers_mini_hit_color", function()
     CustomHitmarkers.SetColorFromConvar( "mini_hit", "255 0 0", Color( 255, 0, 0, 255 ) )
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, _, new )
     local newVal = tonumber( new ) or -1
 
     if newVal < 0 then
@@ -166,7 +166,7 @@ cvars.AddChangeCallback( "custom_hitmarkers_hit_duration", function( _, old, new
     hitDuration = newVal
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, _, new )
     local newVal = tonumber( new ) or -1
 
     if newVal < 0 then
@@ -176,25 +176,25 @@ cvars.AddChangeCallback( "custom_hitmarkers_mini_duration", function( _, old, ne
     miniHitDuration = newVal
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_enabled", function( _, _, new )
     net.Start( "CustomHitmarkers_EnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_npc_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_npc_enabled", function( _, _, new )
     net.Start( "CustomHitmarkers_NPCEnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_ent_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_ent_enabled", function( _, _, new )
     net.Start( "CustomHitmarkers_EntEnableChanged" )
     net.WriteBool( new ~= "0" )
     net.SendToServer()
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_dps_enabled", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_dps_enabled", function( _, _, new )
     dpsEnabled = new ~= "0"
 
     if dpsEnabled then
@@ -202,21 +202,21 @@ cvars.AddChangeCallback( "custom_hitmarkers_dps_enabled", function( _, old, new 
     end
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_round_enabled", function( _, old, new )
-    roundUp = new ~= "0"
+cvars.AddChangeCallback( "custom_hitmarkers_round_enabled", function( _, _, new )
+    roundEnabled = new ~= "0"
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_block_zeros", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_block_zeros", function( _, _, new )
     blockZeros = new ~= "0"
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_x", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_x", function( _, _, new )
     local frac = math.Clamp( tonumber( new ) or 0.02083, 0, 1 )
 
     dpsPosX = ScrW() * frac
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_y", function( _, old, new )
+cvars.AddChangeCallback( "custom_hitmarkers_dps_pos_y", function( _, _, new )
     local frac = math.Clamp( tonumber( new ) or 0.02083, 0, 1 )
 
     dpsPosY = ScrH() * frac
@@ -262,7 +262,7 @@ miniHitDuration = MINI_DURATION:GetFloat() or -1
 hitDuration = hitDuration < 0 and HIT_DURATION_DEFAULT:GetFloat() or hitDuration
 miniHitDuration = miniHitDuration < 0 and MINI_DURATION_DEFAULT:GetFloat() or miniHitDuration
 
-roundUp = HITMARKERS_ROUND_ENABLED:GetBool()
+roundEnabled = HITMARKERS_ROUND_ENABLED:GetBool()
 blockZeros = HITMARKERS_BLOCK_ZEROS:GetBool()
 
 dpsEnabled = HITMARKERS_DPS_ENABLED:GetBool()
@@ -294,7 +294,7 @@ CustomHitmarkers.SoundTbl.Kill = {
 }
 
 function CustomHitmarkers.DoSound( soundType )
-    if not HITMARKERS_SOUND_ENABLED:GetBool() then return end 
+    if not HITMARKERS_SOUND_ENABLED:GetBool() then return end
 
     local snd = CustomHitmarkers.SoundTbl[soundType]
 
@@ -397,7 +397,7 @@ timer.Create( "CustomHitmarkers_TrackDPS", DPS_INTERVAL, 0, function()
     local curTime = RealTime()
 
     if curTime ~= damageLastTime then
-        curDPS = curDPS * ( 1 - passRatio ) + ( damageChunk ) * passRatio / ( curTime - damageLastTime )
+        curDPS = curDPS * ( 1 - passRatio ) + damageChunk * passRatio / ( curTime - damageLastTime )
         curDPSstr = "DPS: " .. tostring( math.Round( curDPS ) )
     end
 
@@ -405,24 +405,21 @@ timer.Create( "CustomHitmarkers_TrackDPS", DPS_INTERVAL, 0, function()
     damageLastTime = curTime
 end )
 
-net.Receive( "CustomHitmarkers_Hit", function()
-    local ply = net.ReadEntity()
-    local pos = net.ReadVector()
-    local dmg = math.Round( net.ReadFloat(), ROUND_DECIMALS )
-    local headShot = net.ReadBool()
-    local hitColor = hitmarkerColors.hit
-    local miniHitColor = hitmarkerColors.mini_hit
-
-    if roundUp then
-        dmg = math.ceil( dmg )
+local function trackHit( ply, pos, dmg, headShot, hitColor, miniHitColor, dontAccum )
+    if roundEnabled then
+        dmg = math.Round( dmg )
     end
 
     if blockZeros and dmg == 0 then return end
 
-    damageAccum = damageAccum + dmg
+    if dontAccum then
+        hitScores[ply] = hitScores[ply] or 0
+    else
+        damageAccum = damageAccum + dmg
+        hitScores[ply] = ( hitScores[ply] or 0 ) + dmg
+    end
 
     miniHitCounts[ply] = ( miniHitCounts[ply] or 0 ) + 1
-    hitScores[ply] = ( hitScores[ply] or 0 ) + dmg
     hitColors[ply] = Color( hitColor.r, hitColor.g, hitColor.b )
     hitTimes[ply] = RealTime()
     hitPoints[ply] = pos
@@ -443,11 +440,81 @@ net.Receive( "CustomHitmarkers_Hit", function()
     }
 
     CustomHitmarkers.DoSound( headShot and "Headshot" or "Hit" )
+end
+
+net.Receive( "CustomHitmarkers_Hit", function()
+    local ply = net.ReadEntity()
+    local pos = net.ReadVector()
+    local trueDmg = net.ReadFloat()
+    local dmg = math.Round( trueDmg, ROUND_DECIMALS )
+    local headShot = net.ReadBool()
+    local numHits = net.ReadInt( 9 )
+    local hitColor = hitmarkerColors.hit
+    local miniHitColor = hitmarkerColors.mini_hit
+
+    if numHits <= 1 then
+        trackHit( ply, pos, dmg, headShot, hitColor, miniHitColor )
+    else
+        local perHitDmg = math.Round( trueDmg / numHits, ROUND_DECIMALS )
+        local radius = ( ply:BoundingRadius() or 20 ) / 3
+
+        if roundEnabled then
+            perHitDmg = math.Round( perHitDmg )
+        end
+
+        -- Splitting up the damage and sending it straight to trackHit() will cause a lot of rounding (espcially with custom_hitmarkers_round_enabled 1) before everything sums back up,
+        --  which causes a ton of imprecision in the final 'burst hit' number. This section finds the discrepancy, tweaks per-hit damage, and overrides the final total to fix things up.
+
+        local roughDmg = perHitDmg * numHits -- What the player would (erroneously) see as their hit total without correcting for truncation
+        local truncatedDmg = trueDmg - roughDmg -- Amount of damage under/over represented by rounding, splitting, and optionally re-rounding the original total
+        local truncationIsSignificant = math.abs( truncatedDmg ) >= 1
+        local singleCorrection = false
+        local singleCorrCount = 1
+
+        if truncationIsSignificant then
+            if roundEnabled then
+                dmg = math.Round( dmg )
+            end
+
+            damageAccum = damageAccum + trueDmg
+            hitScores[ply] = ( hitScores[ply] or 0 ) + dmg
+
+            -- Have to define these to avoid nil errors during the few frames of rendering between now and the upcoming trackHit() calls
+            hitColors[ply] = Color( hitColor.r, hitColor.g, hitColor.b )
+            hitPoints[ply] = pos
+
+            -- By now, the burst damage number will be quite accurate (off by at most +- 1)
+            -- However, the mini hits wouldn't add up correctly if the player bothers to tally them all, which gets handled below
+            local perHitCorrection = math.Round( truncatedDmg / numHits )
+            perHitDmg = perHitDmg + perHitCorrection -- Add/subtract whole number values to each mini hit to get close to proper values
+            singleCorrection = math.Round( trueDmg - perHitDmg * ( numHits - 1 ), ROUND_DECIMALS ) -- Tweak the first hit to account for whatever couldn't be divided into/out from numHits
+
+            -- In case the numbers are real scuffed, with the remainder being negative and overshadowing the new perHitDmg, we have to override more than just the first number
+            if singleCorrection <= 0 then
+                truncatedDmg = singleCorrection - perHitDmg -- The remainder truncation, which always satisfies 0 <= |truncatedDmg| < numHits, so we can split these into -1's safely
+                singleCorrCount = -truncatedDmg
+                singleCorrection = perHitDmg - 1
+
+                -- If you somehow are using a shotgun which does about 0.5 < x < 1 damage and a gajillion bullets per shot to the point where even this extra step yields hit numbers < 1, the fuck are you doing?
+            end
+
+            -- Side note: Rarely, some M9K shotguns (such as the m9k_m3) seem to trigger two dmg events simultaneously, one with multiple bullets, and an additional single-bullet shot,
+            --  which can create a max burst discrepancy of +- 2 and up to three different mini hit numbers.
+            -- This only occasionally happens when shooting players with certain M9K shotguns, seemingly at random.
+        end
+
+        for i = 1, numHits do
+            local theta = math.Rand( 0, 2 * math.pi )
+            local phi = math.Rand( 0, 2 * math.pi )
+            local dist = math.Rand( 0, radius )
+            local offset = Vector( math.sin( theta ) * math.sin( phi ), math.cos( theta ), math.sin( theta ) * math.cos( phi ) ) * dist
+
+            trackHit( ply, pos + offset, i <= singleCorrCount and singleCorrection or perHitDmg, headShot, hitColor, miniHitColor, truncationIsSignificant )
+        end
+    end
 end )
 
 net.Receive( "CustomHitmarkers_Kill", function()
-    local ply = net.ReadEntity()
-
     CustomHitmarkers.DoSound( "Kill" )
 end )
 
