@@ -142,7 +142,8 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
     if ratelimitCheck( attacker ) then return end
 
     local damage = dmg:GetDamage() or 0
-    local numHits = damage / math.max( dmg:GetMaxDamage() or damage, 1 )
+    local chunkDmg = dmg:GetMaxDamage() or damage
+    local numHits = damage / math.max( chunkDmg <= 0 and damage or chunkDmg, 1 )
     numHits = math.max( math.floor( numHits ), 1 )
 
     local headShot = isPlayer and ent:LastHitGroup() == HITGROUP_HEAD
