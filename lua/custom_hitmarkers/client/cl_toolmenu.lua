@@ -186,11 +186,11 @@ local function createCollapsibleSliders( panel, collapseText, settings )
 end
 
 hook.Add( "AddToolMenuCategories", "CustomHitmarkers_AddToolMenuCategories", function()
-    spawnmenu.AddToolCategory( "Options", "Hitmarkers", "#Hitmarkers" )
+    spawnmenu.AddToolCategory( "Options", "CustomTools", "#CustomTools" )
 end )
 
 hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
-    spawnmenu.AddToolMenuOption( "Options", "Hitmarkers", "custom_hitmarkers", "#Hitmarkers", "", "", function( panel )
+    spawnmenu.AddToolMenuOption( "Options", "CustomTools", "custom_hitmarkers", "#Hitmarkers", "", "", function( panel )
         pcall( function() -- ControlPresets only exists in certain gamemodes
             local presetControl = vgui.Create( "ControlPresets", panel )
             local defaults = {}
