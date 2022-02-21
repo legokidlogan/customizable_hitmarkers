@@ -218,8 +218,8 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
 
         updateUsabilityColor( infoPanel, true )
         infoPanel:SetText(
-            "'Burst hits' show total recent damage to a target\n" ..
-            "'Mini hits' show individual hit numbers"
+            "'Burst hits' show total recent damage to a target.\n" ..
+            "'Mini hits' show individual hit numbers."
         )
 
         local _, infoY = infoPanel:GetTextSize()
