@@ -99,6 +99,25 @@ local DPS_POS_Y = createHitmarkerClientConVar( "custom_hitmarkers_dps_pos_y", 0.
 clConVarOverrides.custom_hitmarkers_hit_duration = HIT_DURATION_DEFAULT
 clConVarOverrides.custom_hitmarkers_mini_duration = MINI_DURATION_DEFAULT
 
+do
+    if not file.Exists( "resource/fonts/RobotoMono.ttf", "MOD" ) then
+        local files, folders = file.Find( "resource/fonts/*", "THIRDPARTY" )
+        local robotoExists = false
+
+        for _, v in ipairs( files ) do
+            if v == "RobotoMono.ttf" then
+                robotoExists = true
+
+                break
+            end
+        end
+
+        if not robotoExists then
+            FONT_DATA.font = "Verdana"
+        end
+    end
+end
+
 surface.CreateFont( "CustomHitmarkers_DPSFont", FONT_DATA )
 FONT_DATA.size = HIT_SIZE:GetInt()
 surface.CreateFont( "CustomHitmarkers_HitFont", FONT_DATA )
