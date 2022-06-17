@@ -431,6 +431,10 @@ local function trackHit( ply, pos, dmg, headShot, hitColor, miniHitColor, dontAc
 
     if blockZeros and dmg == 0 then return end
 
+    if not IsValid( ply ) then
+        ply = LocalPlayer() -- Only use ply for tracking groups of hits, so it's fine to use the client as a fallback
+    end
+
     if dontAccum then
         hitScores[ply] = hitScores[ply] or 0
     else
@@ -470,6 +474,10 @@ net.Receive( "CustomHitmarkers_Hit", function()
     local numHits = net.ReadInt( 9 )
     local hitColor = hitmarkerColors.hit
     local miniHitColor = hitmarkerColors.mini_hit
+
+    if not IsValid( ply ) then
+        ply = LocalPlayer()
+    end
 
     if numHits <= 1 then
         trackHit( ply, pos, dmg, headShot, hitColor, miniHitColor )
