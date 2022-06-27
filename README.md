@@ -11,7 +11,7 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_ratelimit_cooldown | How long (in seconds) hit events for a player will be ignored after breaching the ratelimit threshold. | 2 |
 | custom_hitmarkers_npc_allowed | Allows players to opt in to NPC hitmarkers. | 1 |
 | custom_hitmarkers_ent_allowed | Allows players to opt in to entity hitmarkers. | 1 |
-| custom_hitmarkers_hit_duration_default | 3 | How long burst hit numbers will linger for. 0 to disable. Default value used for players. |
+| custom_hitmarkers_hit_duration_default | 0 | How long burst hit numbers will linger for. 0 to disable. Default value used for players. |
 | custom_hitmarkers_mini_duration_default | 2.5 | How long mini hit numbers will linger for. 0 to disable. Default value used for players. |
 
 ## Client Convars

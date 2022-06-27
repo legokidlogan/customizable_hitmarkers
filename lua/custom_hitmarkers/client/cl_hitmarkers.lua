@@ -69,7 +69,7 @@ local HITMARKERS_BLOCK_ZEROS = createHitmarkerClientConVar( "custom_hitmarkers_b
 
 local HIT_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_hit_duration", -1, true, false, "How long burst hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
 local MINI_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_mini_duration", -1, true, false, "How long mini hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
-local HIT_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_hit_duration_default", 3, convarFlags, "How long burst hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
+local HIT_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_hit_duration_default", 0, convarFlags, "How long burst hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
 local MINI_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_mini_duration_default", 2.5, convarFlags, "How long mini hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
 
 local HIT_SOUND = createHitmarkerClientConVar( "custom_hitmarkers_hit_sound", "buttons/lightswitch2.wav", true, false, "Sound used for regular hits." )

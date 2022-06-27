@@ -18,7 +18,7 @@ local RATELIMIT_COOLDOWN = CreateConVar( "custom_hitmarkers_ratelimit_cooldown",
 local NPC_ALLOWED = CreateConVar( "custom_hitmarkers_npc_allowed", 1, convarFlags2, "Allows players to opt in to NPC hitmarkers.", 0, 1 )
 local ENT_ALLOWED = CreateConVar( "custom_hitmarkers_ent_allowed", 1, convarFlags2, "Allows players to opt in to entity hitmarkers.", 0, 1 )
 
-local HIT_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_hit_duration_default", 3, convarFlags2, "How long burst hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
+local HIT_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_hit_duration_default", 0, convarFlags2, "How long burst hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
 local MINI_DURATION_DEFAULT = CreateConVar( "custom_hitmarkers_mini_duration_default", 2.5, convarFlags2, "How long mini hit numbers will linger for. 0 to disable. Default value used for players.", 0, 10 )
 
 local ZERO_VECTOR = Vector( 0, 0, 0 )
