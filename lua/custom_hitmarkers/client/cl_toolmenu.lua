@@ -213,6 +213,7 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         panel:CheckBox( "Enable DPS tracker", "custom_hitmarkers_dps_enabled" )
         panel:CheckBox( "Round damage numbers", "custom_hitmarkers_round_enabled" )
         panel:CheckBox( "Block zero-damage hits", "custom_hitmarkers_block_zeros" )
+        panel:CheckBox( "Combine shotgun blasts into one number\n(doesn't work with some custom weapons)", "custom_hitmarkers_combine_multi_shots" )
 
         local infoPanel = vgui.Create( "DLabel" )
 
