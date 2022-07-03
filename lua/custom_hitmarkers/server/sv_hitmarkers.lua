@@ -4,6 +4,7 @@ CustomHitmarkers.NPCHitUsers = CustomHitmarkers.NPCHitUsers or {}
 CustomHitmarkers.EntHitUsers = CustomHitmarkers.EntHitUsers or {}
 CustomHitmarkers.RatelimitCount = CustomHitmarkers.RatelimitCount or {}
 CustomHitmarkers.RatelimitBlocked = CustomHitmarkers.RatelimitBlocked or {}
+CustomHitmarkers.LastHealths = CustomHitmarkers.LastHealths or {}
 CustomHitmarkers.HEAD_DIST = 10
 CustomHitmarkers.HEAD_DIST_SQUARED = CustomHitmarkers.HEAD_DIST ^ 2
 
@@ -28,6 +29,7 @@ local npcHitUsers = CustomHitmarkers.NPCHitUsers
 local entHitUsers = CustomHitmarkers.EntHitUsers
 local ratelimitCount = CustomHitmarkers.RatelimitCount
 local ratelimitBlocked = CustomHitmarkers.RatelimitBlocked
+local lastHealths = CustomHitmarkers.LastHealths
 
 local ratelimitEnabled = RATELIMIT_ENABLED:GetBool()
 local ratelimitTrackDuration = RATELIMIT_TRACK_DURATION:GetFloat()
@@ -81,11 +83,12 @@ cvars.AddChangeCallback( "custom_hitmarkers_ent_allowed", function( _, _, new )
     net.Broadcast()
 end )
 
-local function sendHit( ent, pos, damage, headShot, numHits, attacker )
+local function sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker )
     net.Start( "CustomHitmarkers_Hit" )
     net.WriteEntity( ent )
     net.WriteVector( pos )
     net.WriteFloat( damage )
+    net.WriteFloat( hpDamage or damage )
     net.WriteBool( headShot )
     net.WriteUInt( numHits or 1, 9 )
     net.Send( attacker )
@@ -122,6 +125,12 @@ end
 
 local ratelimitCheck = CustomHitmarkers.RatelimitCheck
 
+hook.Add( "EntityTakeDamage", "CustomHitmarkers_TrackHealthChange", function( ent, dmg )
+    if not IsValid( ent ) or not ent:IsPlayer() then return end
+
+    lastHealths[ent] = ent:Health()
+end, HOOK_HIGH )
+
 hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( ent, dmg, took )
     if not took then return end
     if not IsValid( ent ) then return end
@@ -153,8 +162,21 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
         pos = ent:WorldSpaceCenter()
     end
 
-    sendHit( ent, pos, damage, headShot, numHits, attacker )
-end )
+    local hpDamage = damage
+
+    if isPlayer then
+        local oldHealth = lastHealths[ent]
+
+        if oldHealth then
+            local newHealth = ent:Health()
+
+            --lastHealths[ent] = newHealth
+            hpDamage = oldHealth - newHealth
+        end
+    end
+
+    sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker )
+end, HOOK_LOW )
 
 hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, hitGroup, dmg )
     if not IsValid( npc ) then return end

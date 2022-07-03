@@ -46,3 +46,4 @@ Hitmarkers for Garry's Mod
 | custom_hitmarkers_kill_sound_pitch_max | Maximum pitch for kill sounds. 100 is 'normal' pitch. | 100 |
 | custom_hitmarkers_block_zeros | Don't display hits with a damage value of 0. | 1 |
 | custom_hitmarkers_combine_multi_shots | Combine multi-shot hits (e.g. a shotgun blast) into one damage number. | 0 |
+| custom_hitmarkers_use_effective_health | Display player hit numbers by how much health damage they took (after armor, etc). | 0 |
