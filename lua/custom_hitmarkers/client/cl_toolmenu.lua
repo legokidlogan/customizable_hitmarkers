@@ -314,10 +314,10 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
 
         hitColorPicker = vgui.Create( "DPanel", panel )
         hitColorPicker:SetSize( 200, 185 )
-    
+
         miniHitColorPicker = vgui.Create( "DPanel", panel )
         miniHitColorPicker:SetSize( 200, 185 )
-    
+
         createColorPicker( hitColorPicker, "hit", "Burst hit color" )
         createColorPicker( miniHitColorPicker, "mini_hit", "Mini hit color" )
 
