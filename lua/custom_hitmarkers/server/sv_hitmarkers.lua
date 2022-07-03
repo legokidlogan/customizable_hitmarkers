@@ -87,7 +87,7 @@ local function sendHit( ent, pos, damage, headShot, numHits, attacker )
     net.WriteVector( pos )
     net.WriteFloat( damage )
     net.WriteBool( headShot )
-    net.WriteInt( numHits or 1, 9 )
+    net.WriteUInt( numHits or 1, 9 )
     net.Send( attacker )
 end
 
