@@ -471,7 +471,7 @@ net.Receive( "CustomHitmarkers_Hit", function()
     local trueDmg = net.ReadFloat()
     local dmg = math.Round( trueDmg, ROUND_DECIMALS )
     local headShot = net.ReadBool()
-    local numHits = net.ReadInt( 9 )
+    local numHits = net.ReadUInt( 9 )
     local hitColor = hitmarkerColors.hit
     local miniHitColor = hitmarkerColors.mini_hit
 
