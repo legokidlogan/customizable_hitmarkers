@@ -68,8 +68,8 @@ local HITMARKERS_SOUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers
 local HITMARKERS_DPS_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
 local HITMARKERS_ROUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_round_enabled", 1, true, false, "Rounds damage numbers.", 0, 1 )
 local HITMARKERS_BLOCK_ZEROS = createHitmarkerClientConVar( "custom_hitmarkers_block_zeros", 1, true, false, "Don't display hits with a damage value of 0.", 0, 1 )
-local HITMARKERS_COMBINE_MULTI_SHOTS = createHitmarkerClientConVar( "custom_hitmarkers_combine_multi_shots", 0, true, false, "Combine multi-shot hits (e.g. a shotgun blast) into one damage number.", 0, 1 )
-local HITMARKERS_USE_EFFECTIVE_HEALTH = createHitmarkerClientConVar( "custom_hitmarkers_use_effective_health", 0, true, false, "Display player hit numbers by how much health damage they took (after armor, etc).", 0, 1 )
+local HITMARKERS_COMBINE_MULTI_SHOT = createHitmarkerClientConVar( "custom_hitmarkers_combine_multi_shot", 1, true, false, "Combine multi-shot hits (e.g. a shotgun blast) into one damage number.", 0, 1 )
+local HITMARKERS_EFFECTIVE_HEALTH = createHitmarkerClientConVar( "custom_hitmarkers_effective_health", 1, true, false, "Display player hit numbers by how much health damage they took (after armor, etc).", 0, 1 )
 
 local HIT_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_hit_duration", -1, true, false, "How long burst hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
 local MINI_DURATION = createHitmarkerClientConVar( "custom_hitmarkers_mini_duration", -1, true, false, "How long mini hit numbers will linger for. 0 to disable. -1 to use server default.", -1, 10 )
@@ -233,11 +233,11 @@ cvars.AddChangeCallback( "custom_hitmarkers_block_zeros", function( _, _, new )
     blockZeros = new ~= "0"
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_combine_multi_shots", function( _, _, new )
+cvars.AddChangeCallback( "custom_hitmarkers_combine_multi_shot", function( _, _, new )
     combineMulti = new ~= "0"
 end )
 
-cvars.AddChangeCallback( "custom_hitmarkers_use_effective_health", function( _, _, new )
+cvars.AddChangeCallback( "custom_hitmarkers_effective_health", function( _, _, new )
     useEffectiveHealth = new ~= "0"
 end )
 
@@ -295,8 +295,8 @@ miniHitDuration = miniHitDuration < 0 and MINI_DURATION_DEFAULT:GetFloat() or mi
 
 roundEnabled = HITMARKERS_ROUND_ENABLED:GetBool()
 blockZeros = HITMARKERS_BLOCK_ZEROS:GetBool()
-combineMulti = HITMARKERS_COMBINE_MULTI_SHOTS:GetBool()
-useEffectiveHealth = HITMARKERS_USE_EFFECTIVE_HEALTH:GetBool()
+combineMulti = HITMARKERS_COMBINE_MULTI_SHOT:GetBool()
+useEffectiveHealth = HITMARKERS_EFFECTIVE_HEALTH:GetBool()
 
 dpsEnabled = HITMARKERS_DPS_ENABLED:GetBool()
 dpsPosX = ScrW() * DPS_POS_X:GetFloat()
