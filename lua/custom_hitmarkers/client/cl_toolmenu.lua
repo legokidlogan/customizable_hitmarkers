@@ -214,7 +214,7 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
         panel:CheckBox( "Round damage numbers", "custom_hitmarkers_round_enabled" )
         panel:CheckBox( "Block zero-damage hits", "custom_hitmarkers_block_zeros" )
         panel:CheckBox( "Combine shotgun blasts into one number\n(doesn't work with some custom weapons)", "custom_hitmarkers_combine_multi_shot" )
-        panel:CheckBox( "Show final HP loss instead of raw damage", "custom_hitmarkers_effective_health" )
+        panel:CheckBox( "Show final HP loss instead of raw damage", "custom_hitmarkers_use_effective_health" )
 
         local infoPanel = vgui.Create( "DLabel" )
 
