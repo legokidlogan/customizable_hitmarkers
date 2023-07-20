@@ -1,5 +1,6 @@
 # customizable_hitmarkers
 Hitmarkers for Garry's Mod
+[Click here for the Workshop version](https://steamcommunity.com/sharedfiles/filedetails/?id=2595569245)
 
 ## Server Convars
 
