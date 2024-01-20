@@ -91,8 +91,8 @@ local HEADSHOT_SOUND_PITCH_MAX = createHitmarkerClientConVar( "custom_hitmarkers
 local KILL_SOUND_PITCH_MIN = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound_pitch_min", 100, true, false, "Minimum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
 local KILL_SOUND_PITCH_MAX = createHitmarkerClientConVar( "custom_hitmarkers_kill_sound_pitch_max", 100, true, false, "Maximum pitch for kill sounds. 100 is 'normal' pitch.", 0, 255 )
 
-local HIT_COLOR = createHitmarkerClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for burst hit numbers." )
-local MINI_COLOR = createHitmarkerClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
+createHitmarkerClientConVar( "custom_hitmarkers_hit_color", "255 0 0", true, false, "Color for burst hit numbers." )
+createHitmarkerClientConVar( "custom_hitmarkers_mini_hit_color", "255 100 0", true, false, "Color for mini hit numbers." )
 
 local HIT_SIZE = createHitmarkerClientConVar( "custom_hitmarkers_hit_size", 30, true, false, "The font size for burst hit numbers.", 1, 200 )
 local MINI_SIZE = createHitmarkerClientConVar( "custom_hitmarkers_mini_size", 30, true, false, "The font size for mini hit numbers.", 1, 200 )
@@ -105,7 +105,7 @@ clConVarOverrides.custom_hitmarkers_mini_duration = MINI_DURATION_DEFAULT
 
 do
     if not file.Exists( "resource/fonts/RobotoMono.ttf", "MOD" ) then
-        local files, folders = file.Find( "resource/fonts/*", "THIRDPARTY" )
+        local files = file.Find( "resource/fonts/*", "THIRDPARTY" )
         local robotoExists = false
 
         for _, v in ipairs( files ) do
