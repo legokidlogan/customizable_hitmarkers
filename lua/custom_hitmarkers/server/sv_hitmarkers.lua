@@ -84,7 +84,7 @@ cvars.AddChangeCallback( "custom_hitmarkers_ent_allowed", function( _, _, new )
 end )
 
 local function sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker )
-    net.Start( "CustomHitmarkers_Hit" )
+    net.Start( "CustomHitmarkers_Hit", true )
     net.WriteEntity( ent )
     net.WriteVector( pos )
     net.WriteFloat( damage )
