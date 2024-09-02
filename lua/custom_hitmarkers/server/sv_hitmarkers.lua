@@ -136,8 +136,15 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
     if not IsValid( ent ) then return end
 
     local attacker = dmg:GetAttacker()
+    if ent == attacker then return end
+    if not IsValid( attacker ) then return end
 
-    if ent == attacker or not IsValid( attacker ) or not attacker:IsPlayer() or not hitUsers[attacker] then return end
+    if attacker:IsVehicle() then
+        attacker = attacker:GetDriver()
+        if not IsValid( attacker ) then return end
+    end
+
+    if not attacker:IsPlayer() or not hitUsers[attacker] then return end
 
     local isNPC = ent:IsNPC()
     local isPlayer = ent:IsPlayer()
@@ -182,10 +189,16 @@ hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, h
     if not IsValid( npc ) then return end
 
     local attacker = dmg:GetAttacker()
+    if npc == attacker then return end
+    if not IsValid( attacker ) then return end
 
-    if npc == attacker or not IsValid( attacker ) or not attacker:IsPlayer() or not hitUsers[attacker] then return end
+    if attacker:IsVehicle() then
+        attacker = attacker:GetDriver()
+        if not IsValid( attacker ) then return end
+    end
+
+    if not attacker:IsPlayer() or not hitUsers[attacker] then return end
     if not npcHitsAllowed or not npcHitUsers[attacker] then return end
-
     if ratelimitCheck( attacker ) then return end
 
     local damage = math.min( ( dmg:GetDamage() or 0 ) + ( dmg:GetDamageBonus() or 0 ), dmg:GetMaxDamage() or math.huge )
