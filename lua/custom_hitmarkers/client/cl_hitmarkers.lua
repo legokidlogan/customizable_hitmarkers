@@ -346,6 +346,8 @@ function CustomHitmarkers.DoSound( soundType, overrides )
         path = path()
     end
 
+    if path == "" then return end
+
     if type( volume ) == "ConVar" then
         volume = volume:GetFloat()
     elseif type( volume ) == "function" then
