@@ -83,7 +83,28 @@ cvars.AddChangeCallback( "custom_hitmarkers_ent_allowed", function( _, _, new )
     net.Broadcast()
 end )
 
-local function sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker )
+local function getInflictor( inflictor )
+    if not IsValid( inflictor ) then return end
+
+    if inflictor:IsPlayer() then
+        local weapon = inflictor:GetActiveWeapon()
+        if IsValid( weapon ) then
+            inflictor = weapon
+        end
+    end
+
+    local emplacementTurret = inflictor.EmplacementTurret
+    if IsValid( emplacementTurret ) then
+        inflictor = emplacementTurret
+    end
+
+    return inflictor
+end
+
+local function sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker, inflictor )
+    inflictor = getInflictor( inflictor )
+    local inflictorClass = inflictor and inflictor:GetClass() or ""
+
     net.Start( "CustomHitmarkers_Hit", true )
     net.WriteEntity( ent )
     net.WriteVector( pos )
@@ -91,6 +112,7 @@ local function sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker 
     net.WriteFloat( hpDamage or damage )
     net.WriteBool( headShot )
     net.WriteUInt( numHits or 1, 9 )
+    net.WriteString( inflictorClass )
     net.Send( attacker )
 end
 
@@ -182,7 +204,7 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
         end
     end
 
-    sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker )
+    sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker, dmg:GetInflictor() )
 end, HOOK_LOW )
 
 hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, hitGroup, dmg )
@@ -209,20 +231,28 @@ hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, h
         pos = npc:WorldSpaceCenter()
     end
 
-    sendHit( npc, pos, damage, damage, headShot, 1, attacker )
+    sendHit( npc, pos, damage, damage, headShot, 1, attacker, dmg:GetInflictor() )
 end )
 
-hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attacker )
+hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, inflictor, attacker )
     if ply == attacker or not hitUsers[attacker] then return end
 
+    inflictor = getInflictor( inflictor )
+    local inflictorClass = inflictor and inflictor:GetClass() or ""
+
     net.Start( "CustomHitmarkers_Kill" )
+    net.WriteString( inflictorClass )
     net.Send( attacker )
 end )
 
-hook.Add( "OnNPCKilled", "CustomHitmarkers_KillNotify", function( _, attacker )
+hook.Add( "OnNPCKilled", "CustomHitmarkers_KillNotify", function( _, attacker, inflictor )
     if not hitUsers[attacker] or not npcHitUsers[attacker] then return end
 
+    inflictor = getInflictor( inflictor )
+    local inflictorClass = inflictor
+
     net.Start( "CustomHitmarkers_Kill" )
+    net.WriteString( inflictorClass )
     net.Send( attacker )
 end )
 

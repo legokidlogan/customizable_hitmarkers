@@ -1,9 +1,11 @@
 CustomHitmarkers = CustomHitmarkers or {}
 CustomHitmarkers.Colors = CustomHitmarkers.Colors or {}
+CustomHitmarkers.WeaponSounds = CustomHitmarkers.WeaponSounds or {}
 CustomHitmarkers.ClientConVars = CustomHitmarkers.ClientConVars or {}
 CustomHitmarkers.ClientConVarOverrides = CustomHitmarkers.ClientConVarOverrides or {}
 
 local hitmarkerColors = CustomHitmarkers.Colors
+local weaponSounds = CustomHitmarkers.WeaponSounds
 local hitDuration
 local miniHitDuration
 local roundEnabled
@@ -326,16 +328,17 @@ CustomHitmarkers.SoundTbl.Kill = {
     Pitch = function() return math.Rand( KILL_SOUND_PITCH_MIN:GetFloat(), KILL_SOUND_PITCH_MAX:GetFloat() ) / 100 end
 }
 
-function CustomHitmarkers.DoSound( soundType )
+function CustomHitmarkers.DoSound( soundType, overrides )
     if not HITMARKERS_SOUND_ENABLED:GetBool() then return end
 
     local snd = CustomHitmarkers.SoundTbl[soundType]
-
     if not snd then return end
 
-    local path = snd.Path
-    local volume = snd.Volume
-    local pitch = snd.Pitch
+    overrides = overrides or {}
+
+    local path = overrides.Path or snd.Path
+    local volume = overrides.Volume or snd.Volume
+    local pitch = overrides.Pitch or snd.Pitch
 
     if type( path ) == "ConVar" then
         path = path:GetString()
@@ -438,7 +441,21 @@ timer.Create( "CustomHitmarkers_TrackDPS", DPS_INTERVAL, 0, function()
     damageLastTime = curTime
 end )
 
-local function trackHit( ply, pos, dmg, headShot, hitColor, miniHitColor, dontAccum )
+local function doHitSound( soundType, inflictorClass )
+    local weaponSettings = weaponSounds[inflictorClass]
+    weaponSettings = weaponSettings and weaponSettings[soundType]
+    local overrides = {}
+
+    if weaponSettings and weaponSettings.Path ~= "default" then
+        overrides.Path = weaponSettings.Path
+        overrides.Volume = weaponSettings.Volume
+        overrides.Pitch = weaponSettings.Pitch / 100
+    end
+
+    CustomHitmarkers.DoSound( soundType, overrides )
+end
+
+local function trackHit( ply, pos, dmg, inflictorClass, headShot, hitColor, miniHitColor, dontAccum )
     if roundEnabled then
         dmg = math.Round( dmg )
     end
@@ -476,7 +493,7 @@ local function trackHit( ply, pos, dmg, headShot, hitColor, miniHitColor, dontAc
         Ply = ply,
     }
 
-    CustomHitmarkers.DoSound( headShot and "Headshot" or "Hit" )
+    doHitSound( headShot and "Headshot" or "Hit", inflictorClass )
 end
 
 net.Receive( "CustomHitmarkers_Hit", function()
@@ -488,6 +505,7 @@ net.Receive( "CustomHitmarkers_Hit", function()
     local dmg = math.Round( trueDmg, ROUND_DECIMALS )
     local headShot = net.ReadBool()
     local numHits = net.ReadUInt( 9 )
+    local inflictorClass = net.ReadString()
     local hitColor = hitmarkerColors.hit
     local miniHitColor = hitmarkerColors.mini_hit
 
@@ -496,7 +514,7 @@ net.Receive( "CustomHitmarkers_Hit", function()
     end
 
     if combineMulti or numHits <= 1 then
-        trackHit( ply, pos, dmg, headShot, hitColor, miniHitColor )
+        trackHit( ply, pos, dmg, inflictorClass, headShot, hitColor, miniHitColor )
     else
         local perHitDmg = math.Round( trueDmg / numHits, ROUND_DECIMALS )
         local radius = ( ply:BoundingRadius() or 20 ) / 3
@@ -552,13 +570,15 @@ net.Receive( "CustomHitmarkers_Hit", function()
             local dist = math.Rand( 0, radius )
             local offset = Vector( math.sin( theta ) * math.sin( phi ), math.cos( theta ), math.sin( theta ) * math.cos( phi ) ) * dist
 
-            trackHit( ply, pos + offset, i <= singleCorrCount and singleCorrection or perHitDmg, headShot, hitColor, miniHitColor, truncationIsSignificant )
+            trackHit( ply, pos + offset, i <= singleCorrCount and singleCorrection or perHitDmg, inflictorClass, headShot, hitColor, miniHitColor, truncationIsSignificant )
         end
     end
 end )
 
 net.Receive( "CustomHitmarkers_Kill", function()
-    CustomHitmarkers.DoSound( "Kill" )
+    local inflictorClass = net.ReadString()
+
+    doHitSound( "Kill", inflictorClass )
 end )
 
 timer.Create( "CustomHitmarkers_UpdatePoints", UPDATE_INTERVAL, 0, function()

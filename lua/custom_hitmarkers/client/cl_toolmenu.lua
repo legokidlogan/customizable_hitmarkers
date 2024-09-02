@@ -310,6 +310,7 @@ hook.Add( "PopulateToolMenu", "CustomHitmarkers_PopulateToolMenu", function()
                 ConVar = "custom_hitmarkers_kill_sound_pitch_max",
             },
         } ) )
+        panel:AddItem( CustomHitmarkers.CreateWeaponSoundPanel( panel ) )
 
         panel:NumSlider( "DPS pos x", "custom_hitmarkers_dps_pos_x", 0, 1, 4 )
         panel:NumSlider( "DPS pos y", "custom_hitmarkers_dps_pos_y", 0, 1, 4 )
