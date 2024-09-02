@@ -209,7 +209,7 @@ hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, h
         pos = npc:WorldSpaceCenter()
     end
 
-    sendHit( ent, pos, damage, damage, headShot, 1, attacker )
+    sendHit( npc, pos, damage, damage, headShot, 1, attacker )
 end )
 
 hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, _, attacker )
