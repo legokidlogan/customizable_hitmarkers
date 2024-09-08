@@ -249,7 +249,7 @@ hook.Add( "OnNPCKilled", "CustomHitmarkers_KillNotify", function( _, attacker, i
     if not hitUsers[attacker] or not npcHitUsers[attacker] then return end
 
     inflictor = getInflictor( inflictor )
-    local inflictorClass = inflictor
+    local inflictorClass = inflictor and inflictor:GetClass() or ""
 
     net.Start( "CustomHitmarkers_Kill" )
     net.WriteString( inflictorClass )
