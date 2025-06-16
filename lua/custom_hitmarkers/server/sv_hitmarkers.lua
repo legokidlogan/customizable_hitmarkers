@@ -232,7 +232,7 @@ hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, h
     end
 
     sendHit( npc, pos, damage, damage, headShot, 1, attacker, dmg:GetInflictor() )
-end )
+end, HOOK_LOW )
 
 hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, inflictor, attacker )
     if ply == attacker or not hitUsers[attacker] then return end
