@@ -64,7 +64,7 @@ local function createHitmarkerClientConVar( name, default, save, userinfo, text,
 end
 
 local HITMARKERS_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_enabled", 1, true, false, "Enables hitmarkers.", 0, 1 )
-local HITMARKERS_NPC_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_npc_enabled", 0, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
+local HITMARKERS_NPC_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_npc_enabled", 1, true, false, "Enables hitmarkers for NPCs.", 0, 1 )
 local HITMARKERS_ENT_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_ent_enabled", 0, true, false, "Enables hitmarkers for other entities.", 0, 1 )
 local HITMARKERS_SOUND_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_sound_enabled", 1, true, false, "Enables hitmarker sounds.", 0, 1 )
 local HITMARKERS_DPS_ENABLED = createHitmarkerClientConVar( "custom_hitmarkers_dps_enabled", 0, true, false, "Enables a DPS tracker.", 0, 1 )
