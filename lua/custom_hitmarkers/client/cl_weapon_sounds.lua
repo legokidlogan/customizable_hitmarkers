@@ -35,7 +35,10 @@ function CustomHitmarkers.CreateWeaponSoundPanel( basePanel )
     infoLabel:SetText(
         "Add sound overrides per each weapon." .. "\n" ..
         "'default' to use your global settings." .. "\n" ..
-        "Leave a sound blank to play nothing."
+        "Leave a sound blank to play nothing." .. "\n\n" ..
+
+        "These are NOT saved into presets (bar at the very top)." .. "\n" ..
+        "They are saved to a file under data/" .. CustomHitmarkers.SETTINGS_PATH .. "."
     )
     collapse:AddItem( infoLabel )
 
