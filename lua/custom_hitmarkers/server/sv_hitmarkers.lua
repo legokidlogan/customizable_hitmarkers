@@ -5,6 +5,7 @@ CustomHitmarkers.EntHitUsers = CustomHitmarkers.EntHitUsers or {}
 CustomHitmarkers.RatelimitCount = CustomHitmarkers.RatelimitCount or {}
 CustomHitmarkers.RatelimitBlocked = CustomHitmarkers.RatelimitBlocked or {}
 CustomHitmarkers.LastHealths = CustomHitmarkers.LastHealths or {}
+CustomHitmarkers.HitQueue = CustomHitmarkers.HitQueue or {} -- [attacker] -> [victim] -> [inflictor] -> { hit info }
 CustomHitmarkers.HEAD_DIST = 10
 CustomHitmarkers.HEAD_DIST_SQUARED = CustomHitmarkers.HEAD_DIST ^ 2
 
@@ -30,6 +31,7 @@ local entHitUsers = CustomHitmarkers.EntHitUsers
 local ratelimitCount = CustomHitmarkers.RatelimitCount
 local ratelimitBlocked = CustomHitmarkers.RatelimitBlocked
 local lastHealths = CustomHitmarkers.LastHealths
+local hitQueue = CustomHitmarkers.HitQueue
 
 local ratelimitEnabled = RATELIMIT_ENABLED:GetBool()
 local ratelimitTrackDuration = RATELIMIT_TRACK_DURATION:GetFloat()
@@ -101,19 +103,79 @@ local function getInflictor( inflictor )
     return inflictor
 end
 
-local function sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker, inflictor )
-    inflictor = getInflictor( inflictor )
-    local inflictorClass = inflictor and inflictor:GetClass() or ""
-
+local function sendHit( victim, attacker, pos, damage, hpDamage, headShot, numHits, inflictorClass )
     net.Start( "CustomHitmarkers_Hit", true )
-    net.WriteEntity( ent )
+    net.WriteEntity( victim )
     net.WriteVector( pos )
     net.WriteFloat( damage )
-    net.WriteFloat( hpDamage or damage )
+    net.WriteFloat( hpDamage )
     net.WriteBool( headShot )
     net.WriteUInt( numHits or 1, 9 )
     net.WriteString( inflictorClass )
     net.Send( attacker )
+end
+
+local function processHitQueue()
+    hook.Remove( "Think", "CustomHitmarkers_ProcessHitQueue" )
+
+    local world = game.GetWorld()
+
+    for attacker, victimQueue in pairs( hitQueue ) do
+        if not IsValid( attacker ) then continue end
+
+        for victim, inflictorQueue in pairs( victimQueue ) do
+            if not IsValid( victim ) then
+                victim = world
+            end
+
+            for _, hit in pairs( inflictorQueue ) do
+                sendHit( victim, attacker, hit.pos, hit.damage, hit.hpDamage, hit.headShot, hit.numHits, hit.inflictorClass )
+            end
+        end
+
+        hitQueue[attacker] = nil
+    end
+end
+
+-- Damage events with the same attacker, victim, inflictor combination across the same tick will get merged together.
+local function queueHit( victim, attacker, pos, damage, hpDamage, headShot, numHits, inflictor )
+    inflictor = getInflictor( inflictor )
+
+    local attackerQueue = hitQueue[attacker]
+    if not attackerQueue then
+        attackerQueue = {}
+        hitQueue[attacker] = attackerQueue
+    end
+
+    local victimQueue = attackerQueue[victim]
+    if not victimQueue then
+        victimQueue = {}
+        attackerQueue[victim] = victimQueue
+    end
+
+    local hit = victimQueue[inflictor]
+    if not hit then
+        hit = {
+            pos = pos,
+            damage = 0,
+            hpDamage = 0,
+            headShot = false,
+            numHits = 0,
+            inflictorClass = inflictor and inflictor:GetClass() or "",
+        }
+        victimQueue[inflictor] = hit
+    end
+
+    local prevHits = hit.numHits
+    local totalHits = prevHits + numHits
+
+    hit.pos = ( hit.pos * ( prevHits / totalHits ) ) + ( pos * ( numHits / totalHits ) )
+    hit.damage = hit.damage + damage
+    hit.hpDamage = hit.hpDamage + hpDamage
+    hit.headShot = hit.headShot or headShot
+    hit.numHits = totalHits
+
+    hook.Add( "Think", "CustomHitmarkers_ProcessHitQueue", processHitQueue )
 end
 
 function CustomHitmarkers.RatelimitCheck( attacker )
@@ -204,7 +266,7 @@ hook.Add( "PostEntityTakeDamage", "CustomHitmarkers_TrackDamagePos", function( e
         end
     end
 
-    sendHit( ent, pos, damage, hpDamage, headShot, numHits, attacker, dmg:GetInflictor() )
+    queueHit( ent, attacker, pos, damage, hpDamage, headShot, numHits, dmg:GetInflictor() )
 end, HOOK_LOW )
 
 hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, hitGroup, dmg )
@@ -231,7 +293,7 @@ hook.Add( "ScaleNPCDamage", "CustomHitmarkers_NotifyNPCDamage", function( npc, h
         pos = npc:WorldSpaceCenter()
     end
 
-    sendHit( npc, pos, damage, damage, headShot, 1, attacker, dmg:GetInflictor() )
+    queueHit( npc, attacker, pos, damage, damage, headShot, 1, dmg:GetInflictor() )
 end, HOOK_LOW )
 
 hook.Add( "PlayerDeath", "CustomHitmarkers_KillNotify", function( ply, inflictor, attacker )
