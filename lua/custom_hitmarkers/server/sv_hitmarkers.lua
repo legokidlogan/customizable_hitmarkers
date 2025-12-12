@@ -139,7 +139,7 @@ end
 
 -- Damage events with the same attacker, victim, inflictor combination across the same tick will get merged together.
 local function queueHit( victim, attacker, pos, damage, hpDamage, headShot, numHits, inflictor )
-    inflictor = getInflictor( inflictor )
+    inflictor = getInflictor( inflictor ) or game.GetWorld()
 
     local attackerQueue = hitQueue[attacker]
     if not attackerQueue then
@@ -161,7 +161,7 @@ local function queueHit( victim, attacker, pos, damage, hpDamage, headShot, numH
             hpDamage = 0,
             headShot = false,
             numHits = 0,
-            inflictorClass = inflictor and inflictor:GetClass() or "",
+            inflictorClass = IsValid( inflictor ) and inflictor:GetClass() or "",
         }
         victimQueue[inflictor] = hit
     end
